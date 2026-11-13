@@ -140,14 +140,15 @@
 
         .sync-badge {
             font-size: 11px;
-            padding: 4px 8px;
-            border-radius: 10px;
+            padding: 4px 10px;
+            border-radius: 12px;
             background: rgba(52, 199, 89, 0.15);
             color: var(--success-color);
             border: 1px solid rgba(52, 199, 89, 0.3);
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
+            font-weight: 600;
         }
 
         .glass-card {
@@ -200,10 +201,15 @@
         .stat-item.income .val { color: var(--success-color); }
         .stat-item.expense .val { color: var(--danger-color); }
 
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
         .section-title {
             font-size: 18px;
             font-weight: 600;
-            margin-bottom: 12px;
             letter-spacing: -0.3px;
         }
 
@@ -404,8 +410,8 @@
         .q-btn {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            padding: 8px;
-            border-radius: 10px;
+            padding: 8px 12px;
+            border-radius: 12px;
             font-size: 13px;
             font-weight: 600;
             color: var(--text-main);
@@ -428,6 +434,23 @@
 
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+
+        .import-preview-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--card-border);
+            gap: 8px;
+        }
+        .import-preview-row select {
+            background: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 6px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -444,7 +467,7 @@
         </div>
         <div class="header-actions">
             <div id="syncStatus" class="sync-badge" title="Статус синхронизации">
-                <i class="fa-solid fa-cloud"></i> Локально
+                <i class="fa-solid fa-cloud"></i> Загрузка...
             </div>
             <button class="icon-btn" onclick="toggleTheme()" title="Сменить тему">
                 <i class="fa-solid fa-circle-half-stroke" id="themeIcon"></i>
@@ -477,7 +500,10 @@
         </div>
 
         <!-- Популярные категории -->
-        <div class="section-title">Категории расходов</div>
+        <div class="section-header">
+            <div class="section-title">Категории расходов</div>
+            <button class="q-btn" onclick="openAddCategoryModal()"><i class="fa-solid fa-plus"></i> Категория</button>
+        </div>
         <div class="grid-categories" id="categoriesGrid">
             <!-- Динамически заполняется скриптом -->
         </div>
@@ -577,6 +603,24 @@
         </div>
     </div>
 
+    <!-- Модальное окно: Добавление категории -->
+    <div class="modal-overlay" id="addCategoryModal">
+        <div class="modal-sheet">
+            <div class="sheet-handle"></div>
+            <div class="modal-title">Новая категория</div>
+            <div class="form-group">
+                <label class="form-label">Название</label>
+                <input type="text" class="form-input" id="newCatName" placeholder="Например: Подписки">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Цвет иконки</label>
+                <input type="color" class="form-input" id="newCatColor" value="#007aff" style="height: 50px; padding: 4px;">
+            </div>
+            <button class="btn-primary" onclick="saveNewCategory()">Создать</button>
+            <button class="btn-secondary" onclick="closeModal('addCategoryModal')">Отмена</button>
+        </div>
+    </div>
+
     <!-- Модальное окно: Кредиты и карты -->
     <div class="modal-overlay" id="creditsModal">
         <div class="modal-sheet">
@@ -619,17 +663,28 @@
         </div>
     </div>
 
-    <!-- Модальное окно: Импорт выписки -->
+    <!-- Модальное окно: Импорт выписки из банка (Файл или Текст) -->
     <div class="modal-overlay" id="importModal">
         <div class="modal-sheet">
             <div class="sheet-handle"></div>
             <div class="modal-title">Импорт банковской выписки</div>
             <div class="form-group">
-                <label class="form-label">Вставьте текст СМС или выписки (CSV / строки)</label>
-                <textarea class="form-input" id="importText" rows="6" placeholder="12.05 Пятерочка -450р&#10;13.05 Яндекс Такси -350р"></textarea>
+                <label class="form-label">Загрузить файл из банка (.csv или .txt)</label>
+                <input type="file" id="bankStatementFile" accept=".csv,.txt" class="form-input" onchange="handleStatementFile(event)">
             </div>
-            <button class="btn-primary" onclick="processImport()">Распознать и импортировать</button>
-            <button class="btn-secondary" onclick="closeModal('importModal')">Отмена</button>
+            <div class="form-group">
+                <label class="form-label">Или вставьте текст СМС / выписки</label>
+                <textarea class="form-input" id="importText" rows="5" placeholder="12.05 Пятерочка -450р&#10;13.05 Яндекс Такси -350р"></textarea>
+            </div>
+            <button class="btn-secondary" onclick="parseStatementPreview()" style="margin-bottom: 12px;">Распознать операции</button>
+            
+            <div id="importPreviewContainer" style="display:none; margin-bottom: 16px;">
+                <div class="form-label">Найденные траты (проверьте категории):</div>
+                <div id="importPreviewList" style="max-height: 220px; overflow-y: auto; border: 1px solid var(--card-border); border-radius: 14px; padding: 10px;"></div>
+                <button class="btn-primary" onclick="confirmImport()" style="margin-top: 12px;">Импортировать в бюджет</button>
+            </div>
+
+            <button class="btn-secondary" onclick="closeModal('importModal')">Закрыть</button>
         </div>
     </div>
 
@@ -646,9 +701,13 @@
                 </select>
             </div>
             <div class="form-group" style="margin-top: 20px;">
-                <label class="form-label">Резервное копирование</label>
-                <button class="btn-secondary" onclick="exportData()"><i class="fa-solid fa-download"></i> Экспорт данных в файл</button>
-                <button class="btn-secondary" onclick="document.getElementById('importFile').click()"><i class="fa-solid fa-upload"></i> Импорт из файла</button>
+                <label class="form-label">Облако Supabase</label>
+                <button class="btn-secondary" onclick="forceSync()"><i class="fa-solid fa-rotate"></i> Принудительно синхронизировать</button>
+            </div>
+            <div class="form-group" style="margin-top: 20px;">
+                <label class="form-label">Резервное копирование (файл)</label>
+                <button class="btn-secondary" onclick="exportData()"><i class="fa-solid fa-download"></i> Скачать резервную копию</button>
+                <button class="btn-secondary" onclick="document.getElementById('importFile').click()"><i class="fa-solid fa-upload"></i> Восстановить из файла</button>
                 <input type="file" id="importFile" style="display:none" onchange="importDataFile(event)">
             </div>
             <button class="btn-primary" onclick="closeModal('settingsModal')" style="margin-top: 20px;">Готово</button>
@@ -661,8 +720,12 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_PvCN5tJ2UW2UTS_IxFuAVA_6tslftYH';
         
         let supabaseClient = null;
-        if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        try {
+            if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (err) {
+            console.error('Ошибка инициализации клиента Supabase:', err);
         }
 
         // Состояние приложения
@@ -672,37 +735,44 @@
             expenses: [],
             credits: [],
             categories: [
-                { id: 'supermarket', name: 'Продукты', icon: 'fa-cart-shopping', color: '#34c759', keywords: ['пятерочка', 'магнит', 'лента', 'перекресток', 'ашан', 'дикси', 'купер', 'вкусвилль', 'продукты'] },
-                { id: 'transport', name: 'Транспорт', icon: 'fa-car', color: '#007aff', keywords: ['uber', 'яндекс такси', 'метро', 'автобус', 'каршеринг', 'драйв', 'бензин', 'заправка', 'азс'] },
-                { id: 'marketplace', name: 'Маркетплейсы', icon: 'fa-bag-shopping', color: '#ff9500', keywords: ['wildberries', 'ozon', 'вайлдберриз', 'озон', 'маркет'] },
-                { id: 'cafe', name: 'Кафе и Рестораны', icon: 'fa-utensils', color: '#ff3b30', keywords: ['ресторан', 'кафе', 'кофе', 'coffee', 'вкафе', 'додо', 'вкус точка', 'столовая', 'бар'] },
-                { id: 'pharmacy', name: 'Аптеки и Здоровье', icon: 'fa-pills', color: '#af52de', keywords: ['аптека', 'лирика', 'ригла', 'здоровье', 'клиника', 'инвитро'] },
-                { id: 'utility', name: 'ЖКХ и Связь', icon: 'fa-house-chimney', color: '#5856d6', keywords: ['мтс', 'билайн', 'теле2', 'мгтс', 'жкх', 'электричество', 'интернет', 'квартплата'] }
+                { id: 'supermarket', name: 'Продукты', icon: 'fa-cart-shopping', color: '#34c759', keywords: ['пятерочка', 'магнит', 'лента', 'перекресток', 'ашан', 'дикси', 'купер', 'вкусвилль', 'продукты', 'спар', 'spar', 'красное', 'белое'] },
+                { id: 'transport', name: 'Транспорт', icon: 'fa-car', color: '#007aff', keywords: ['uber', 'яндекс такси', 'такси', 'метро', 'автобус', 'каршеринг', 'драйв', 'бензин', 'заправка', 'азс', 'лукойл', 'газпромнефть', 'ржд'] },
+                { id: 'marketplace', name: 'Маркетплейсы', icon: 'fa-bag-shopping', color: '#ff9500', keywords: ['wildberries', 'ozon', 'вайлдберриз', 'озон', 'маркет', 'яндекс маркет', 'мегамаркет', 'алиэкспресс'] },
+                { id: 'cafe', name: 'Кафе и Еда', icon: 'fa-utensils', color: '#ff3b30', keywords: ['ресторан', 'кафе', 'кофе', 'coffee', 'додо', 'вкусно', 'точка', 'столовая', 'бар', 'бургер', 'ростикс', 'kfc', 'доставка'] },
+                { id: 'pharmacy', name: 'Аптеки', icon: 'fa-pills', color: '#af52de', keywords: ['аптека', 'ригла', 'здоровье', 'клиника', 'инвитро', 'гемотест', 'горздрав', 'столичка'] },
+                { id: 'utility', name: 'ЖКХ и Связь', icon: 'fa-house-chimney', color: '#5856d6', keywords: ['мтс', 'билайн', 'теле2', 'мегафон', 'мгтс', 'жкх', 'электричество', 'интернет', 'квартплата', 'ростелеком'] }
             ]
         };
 
-        // Инициализация
+        let parsedTransactions = [];
+
+        // Инициализация при запуске
         window.addEventListener('DOMContentLoaded', async () => {
+            renderCategoriesGrid();
             await loadData();
             applyTheme(state.theme);
             document.getElementById('themeSelector').value = state.theme;
             updateUI();
         });
 
-        // Синхронизация с облаком / localStorage
+        // Сохранение в облако Supabase + localStorage
         async function saveData() {
             localStorage.setItem('ios_budget_state', JSON.stringify(state));
             
             if (supabaseClient) {
-                setSyncStatus('Синхронизация...', 'pending');
+                setSyncStatus('Сохранение...', 'pending');
                 try {
                     const { error } = await supabaseClient
                         .from('app_data')
-                        .upsert({ id: 1, payload: state });
-                    if (error) throw error;
+                        .upsert({ id: 1, payload: state }, { onConflict: 'id' });
+                    if (error) {
+                        console.error('Supabase upsert error:', error);
+                        setSyncStatus('Ошибка RLS/БД', 'error');
+                        return;
+                    }
                     setSyncStatus('В облаке', 'success');
                 } catch (e) {
-                    console.error('Ошибка Supabase:', e);
+                    console.error('Ошибка сети Supabase:', e);
                     setSyncStatus('Ошибка сети', 'error');
                 }
             } else {
@@ -710,7 +780,18 @@
             }
         }
 
+        // Загрузка из облака Supabase
         async function loadData() {
+            const local = localStorage.getItem('ios_budget_state');
+            if (local) {
+                try {
+                    const parsedLocal = JSON.parse(local);
+                    if (parsedLocal && parsedLocal.categories) {
+                        state = { ...state, ...parsedLocal };
+                    }
+                } catch (e) {}
+            }
+
             if (supabaseClient) {
                 try {
                     setSyncStatus('Загрузка...', 'pending');
@@ -718,37 +799,67 @@
                         .from('app_data')
                         .select('payload')
                         .eq('id', 1)
-                        .single();
+                        .maybeSingle();
+
+                    if (error) {
+                        console.error('Supabase select error:', error);
+                        setSyncStatus('Ошибка доступа', 'error');
+                        return;
+                    }
+
                     if (data && data.payload) {
                         state = { ...state, ...data.payload };
+                        localStorage.setItem('ios_budget_state', JSON.stringify(state));
                         setSyncStatus('В облаке', 'success');
-                        return;
+                    } else {
+                        // Если строка в базе еще не создана — создаем её автоматически
+                        await saveData();
                     }
                 } catch (e) {
                     console.error('Не удалось загрузить из Supabase:', e);
+                    setSyncStatus('Локально', 'local');
                 }
+            } else {
+                setSyncStatus('Локально', 'local');
             }
-            
-            const local = localStorage.getItem('ios_budget_state');
-            if (local) {
-                try { state = JSON.parse(local); } catch(e){}
-            }
-            setSyncStatus('Локально', 'local');
         }
+
+        window.forceSync = async () => {
+            await saveData();
+            updateUI();
+        };
 
         function setSyncStatus(text, type) {
             const badge = document.getElementById('syncStatus');
+            if (!badge) return;
             let icon = 'fa-cloud';
             let color = 'var(--success-color)';
-            if (type === 'pending') { icon = 'fa-spinner fa-spin'; color = 'var(--warning-color)'; }
-            else if (type === 'error') { icon = 'fa-triangle-exclamation'; color = 'var(--danger-color)'; }
-            else if (type === 'local') { icon = 'fa-database'; color = 'var(--text-secondary)'; }
+            let bg = 'rgba(52, 199, 89, 0.15)';
+            let border = 'rgba(52, 199, 89, 0.3)';
+
+            if (type === 'pending') {
+                icon = 'fa-spinner fa-spin';
+                color = 'var(--warning-color)';
+                bg = 'rgba(255, 149, 0, 0.15)';
+                border = 'rgba(255, 149, 0, 0.3)';
+            } else if (type === 'error') {
+                icon = 'fa-triangle-exclamation';
+                color = 'var(--danger-color)';
+                bg = 'rgba(255, 59, 48, 0.15)';
+                border = 'rgba(255, 59, 48, 0.3)';
+            } else if (type === 'local') {
+                icon = 'fa-database';
+                color = 'var(--text-secondary)';
+                bg = 'rgba(142, 142, 147, 0.15)';
+                border = 'rgba(142, 142, 147, 0.3)';
+            }
             
             badge.innerHTML = `<i class="fa-solid ${icon}"></i> ${text}`;
             badge.style.color = color;
+            badge.style.background = bg;
+            badge.style.borderColor = border;
         }
 
-        // Обновление интерфейса
         function updateUI() {
             const totalIncome = state.incomes.reduce((acc, item) => acc + item.amount, 0);
             const totalExpense = state.expenses.reduce((acc, item) => acc + item.amount, 0);
@@ -765,11 +876,12 @@
         }
 
         function formatMoney(num) {
-            return num.toLocaleString('ru-RU') + ' ₽';
+            return Number(num || 0).toLocaleString('ru-RU') + ' ₽';
         }
 
         function renderCategoriesGrid() {
             const grid = document.getElementById('categoriesGrid');
+            if (!grid) return;
             grid.innerHTML = '';
 
             state.categories.forEach(cat => {
@@ -791,6 +903,7 @@
 
         function renderAnalytics() {
             const container = document.getElementById('analyticsBars');
+            if (!container) return;
             container.innerHTML = '';
 
             const totalExpense = state.expenses.reduce((acc, item) => acc + item.amount, 0) || 1;
@@ -817,11 +930,12 @@
 
         function renderHistory() {
             const list = document.getElementById('historyList');
+            if (!list) return;
             const query = document.getElementById('searchHistory').value.toLowerCase();
             
             let allTx = [
-                ...state.incomes.map(i => ({ ...i, type: 'income', title: i.source || 'Доход', dateStr: new Date(i.date).toLocaleDateString() })),
-                ...state.expenses.map(e => ({ ...e, type: 'expense', title: state.categories.find(c => c.id === e.categoryId)?.name || 'Расход', subtitle: e.comment, dateStr: new Date(e.date).toLocaleDateString() }))
+                ...state.incomes.map(i => ({ ...i, type: 'income', title: i.source || 'Доход', dateStr: new Date(i.date).toLocaleDateString('ru-RU') })),
+                ...state.expenses.map(e => ({ ...e, type: 'expense', title: state.categories.find(c => c.id === e.categoryId)?.name || 'Расход', subtitle: e.comment, dateStr: new Date(e.date).toLocaleDateString('ru-RU') }))
             ];
 
             allTx.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -853,7 +967,12 @@
             });
         }
 
-        window.openIncomeModal = () => document.getElementById('incomeModal').classList.add('open');
+        window.openIncomeModal = () => {
+            document.getElementById('incomeAmount').value = '';
+            document.getElementById('incomeSource').value = '';
+            document.getElementById('incomeModal').classList.add('open');
+        };
+
         window.openExpenseModal = (catId, catName) => {
             document.getElementById('expenseCatId').value = catId;
             document.getElementById('expenseModalTitle').innerText = 'Расход: ' + catName;
@@ -861,6 +980,28 @@
             document.getElementById('expenseComment').value = '';
             document.getElementById('expenseModal').classList.add('open');
         };
+
+        window.openAddCategoryModal = () => {
+            document.getElementById('newCatName').value = '';
+            document.getElementById('addCategoryModal').classList.add('open');
+        };
+
+        window.saveNewCategory = async () => {
+            const name = document.getElementById('newCatName').value.trim();
+            const color = document.getElementById('newCatColor').value;
+            if (!name) return alert('Введите название категории');
+            state.categories.push({
+                id: 'cat_' + Date.now(),
+                name: name,
+                icon: 'fa-tag',
+                color: color,
+                keywords: [name.toLowerCase()]
+            });
+            await saveData();
+            closeModal('addCategoryModal');
+            updateUI();
+        };
+
         window.closeModal = (id) => document.getElementById(id).classList.remove('open');
 
         window.quickSum = (val) => {
@@ -968,45 +1109,117 @@
             document.getElementById('creditsSummary').innerText = `${state.credits.length} продуктов • Общий долг: ${formatMoney(total)}`;
         }
 
-        window.openImportModal = () => document.getElementById('importModal').classList.add('open');
+        // Авто-импорт банковской выписки (CSV или текст)
+        window.openImportModal = () => {
+            document.getElementById('importText').value = '';
+            document.getElementById('importPreviewContainer').style.display = 'none';
+            parsedTransactions = [];
+            document.getElementById('importModal').classList.add('open');
+        };
 
-        window.processImport = async () => {
+        window.handleStatementFile = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('importText').value = e.target.result;
+                parseStatementPreview();
+            };
+            reader.readAsText(file, 'UTF-8');
+        };
+
+        window.parseStatementPreview = () => {
             const text = document.getElementById('importText').value;
-            if (!text.trim()) return alert('Вставьте текст выписки');
+            if (!text.trim()) return alert('Вставьте текст или выберите файл выписки');
 
-            const lines = text.split('
-');
-            let addedCount = 0;
+            const lines = text.split(/\r?\n/);
+            parsedTransactions = [];
 
             lines.forEach(line => {
+                if (!line.trim()) return;
                 const lower = line.toLowerCase();
-                const sumMatch = line.match(/[-]?\d+[\s,.]?\d*/);
-                if (!sumMatch) return;
-                const amount = Math.abs(parseFloat(sumMatch[0].replace(',', '.')));
-                if (!amount || amount > 1000000) return;
+                
+                // Ищем сумму (поддержка форматов -450.00, 1 200,50, -350р)
+                const cleanLine = line.replace(/(\d)\s+(?=\d{3})/g, '$1');
+                const matches = cleanLine.match(/[-−]?\d+(?:[.,]\d{1,2})?/g);
+                if (!matches) return;
+
+                // Берем число, похожее на сумму (исключая даты вида 12.05)
+                let amount = 0;
+                for (let m of matches) {
+                    const num = Math.abs(parseFloat(m.replace('−', '-').replace(',', '.')));
+                    if (num >= 10 && num <= 2000000) {
+                        amount = num;
+                        if (m.startsWith('-') || m.startsWith('−')) break;
+                    }
+                }
+                if (!amount) return;
 
                 let matchedCat = state.categories[0].id;
                 for (let cat of state.categories) {
-                    if (cat.keywords.some(kw => lower.includes(kw))) {
+                    if (cat.keywords && cat.keywords.some(kw => lower.includes(kw))) {
                         matchedCat = cat.id;
                         break;
                     }
                 }
 
-                state.expenses.push({
-                    id: 'imp_' + Math.random(),
-                    amount,
+                parsedTransactions.push({
+                    amount: amount,
                     categoryId: matchedCat,
-                    comment: line.substring(0, 30),
-                    date: new Date().toISOString()
+                    comment: line.replace(/[;"']/g, ' ').trim().substring(0, 40)
                 });
-                addedCount++;
             });
 
+            if (parsedTransactions.length === 0) {
+                return alert('Не удалось распознать суммы в тексте. Проверьте формат.');
+            }
+
+            renderImportPreview();
+        };
+
+        function renderImportPreview() {
+            const list = document.getElementById('importPreviewList');
+            list.innerHTML = '';
+
+            parsedTransactions.forEach((tx, idx) => {
+                const options = state.categories.map(c => 
+                    `<option value="${c.id}" ${c.id === tx.categoryId ? 'selected' : ''}>${c.name}</option>`
+                ).join('');
+
+                list.innerHTML += `
+                    <div class="import-preview-row">
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${tx.comment}</div>
+                            <div style="font-size:13px; font-weight:700; color:var(--danger-color);">${formatMoney(tx.amount)}</div>
+                        </div>
+                        <select onchange="parsedTransactions[${idx}].categoryId = this.value">
+                            ${options}
+                        </select>
+                    </div>
+                `;
+            });
+
+            document.getElementById('importPreviewContainer').style.display = 'block';
+        }
+
+        window.confirmImport = async () => {
+            if (parsedTransactions.length === 0) return;
+
+            parsedTransactions.forEach(tx => {
+                state.expenses.push({
+                    id: 'imp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                    amount: tx.amount,
+                    categoryId: tx.categoryId,
+                    comment: tx.comment,
+                    date: new Date().toISOString()
+                });
+            });
+
+            const count = parsedTransactions.length;
             await saveData();
             closeModal('importModal');
             updateUI();
-            alert(`Успешно импортировано операций: ${addedCount}`);
+            alert(`Успешно импортировано операций: ${count}`);
         };
 
         window.openSettingsModal = () => document.getElementById('settingsModal').classList.add('open');
