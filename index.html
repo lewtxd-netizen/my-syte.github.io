@@ -286,7 +286,7 @@
                 </div>
                 <div>
                     <h1 class="text-[26px] font-bold tracking-tight text-primary-ios leading-none">Бюджет</h1>
-                    <p id="authStatusLabel" class="text-[10px] font-medium text-tertiary-ios mt-1 cursor-pointer hover:underline" onclick="openAuthModal()">Локальный режим</p>
+                    <p id="authStatusHeaderLabel" class="text-[10px] font-medium text-tertiary-ios mt-1 cursor-pointer hover:underline" onclick="switchTab('profile')">Локальный режим</p>
                 </div>
             </div>
             
@@ -435,10 +435,61 @@
             </section>
         </div>
 
+        <!-- ==================== TAB 4: ПРОФИЛЬ ==================== -->
+        <div id="tab-profile" class="hidden space-y-4">
+            <section class="ios27-glass p-5 space-y-4">
+                <div class="flex items-center space-x-3">
+                    <div id="profileAvatarIcon" class="w-14 h-14 rounded-[22px] bg-[#007AFF] flex items-center justify-center text-white text-xl shadow-sm">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div>
+                        <h2 id="profileTitle" class="text-lg font-bold text-primary-ios">Локальный режим</h2>
+                        <p id="profileSubtitle" class="text-xs text-tertiary-ios">Данные хранятся только на этом устройстве</p>
+                    </div>
+                </div>
+
+                <!-- Not Logged In View -->
+                <div id="profileAuthContainer" class="space-y-3 pt-2">
+                    <div class="ios27-segmented grid grid-cols-2 text-xs font-semibold text-secondary-ios">
+                        <button onclick="switchAuthMode('login')" id="authTabLogin" class="ios27-segment-btn py-2 active">Вход</button>
+                        <button onclick="switchAuthMode('register')" id="authTabRegister" class="ios27-segment-btn py-2">Регистрация</button>
+                    </div>
+
+                    <div class="space-y-2.5">
+                        <div>
+                            <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Никнейм</label>
+                            <input type="text" id="authNicknameInput" placeholder="например: ivan" 
+                                class="w-full py-3 px-4 rounded-2xl ios27-input text-sm">
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Пароль</label>
+                            <input type="password" id="authPasswordInput" placeholder="••••••••" 
+                                class="w-full py-3 px-4 rounded-2xl ios27-input text-sm">
+                        </div>
+                    </div>
+
+                    <button onclick="handleAuthSubmit()" id="authSubmitBtn" class="w-full py-3.5 rounded-2xl bg-[#007AFF] text-white font-semibold text-base shadow-sm active:scale-[0.98]">
+                        Войти в аккаунт
+                    </button>
+                </div>
+
+                <!-- Logged In View -->
+                <div id="profileLogoutContainer" class="hidden space-y-3 pt-2">
+                    <div class="p-3.5 rounded-2xl border" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
+                        <p class="text-xs text-secondary-ios">Аккаунт синхронизирован с облаком Supabase. Ваши операции и настройки хранятся в безопасности и доступны только вам.</p>
+                    </div>
+                    <button onclick="handleLogout()" class="w-full py-3.5 rounded-2xl bg-[#FF3B30]/12 text-[#FF3B30] font-semibold text-base shadow-sm active:scale-[0.98]">
+                        Выйти из аккаунта
+                    </button>
+                </div>
+            </section>
+        </div>
+
     </main>
 
+    <!-- 4-Tab Dock -->
     <nav class="fixed ios-dock-bottom inset-x-0 z-30 px-5 pointer-events-none">
-        <div class="max-w-[330px] mx-auto ios27-dock p-1.5 grid grid-cols-3 gap-1 pointer-events-auto">
+        <div class="max-w-[360px] mx-auto ios27-dock p-1.5 grid grid-cols-4 gap-1 pointer-events-auto">
             <button onclick="switchTab('home')" id="nav-home" class="dock-tab-btn active py-2 flex flex-col items-center justify-center space-y-0.5">
                 <i class="fa-solid fa-wallet text-base"></i>
                 <span class="text-[10px] font-semibold">Главная</span>
@@ -451,60 +502,14 @@
                 <i class="fa-solid fa-clock-rotate-left text-base"></i>
                 <span class="text-[10px] font-semibold">История</span>
             </button>
+            <button onclick="switchTab('profile')" id="nav-profile" class="dock-tab-btn py-2 flex flex-col items-center justify-center space-y-0.5 text-tertiary-ios">
+                <i class="fa-solid fa-user text-base"></i>
+                <span class="text-[10px] font-semibold">Профиль</span>
+            </button>
         </div>
     </nav>
 
     <!-- ==================== MODALS & BOTTOM SHEETS ==================== -->
-
-    <!-- Auth / Supabase Sync Modal -->
-    <div id="authModal" class="fixed inset-0 bg-black/35 backdrop-blur-[3px] z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'authModal')">
-        <div class="w-full max-w-md ios27-sheet p-5 pb-9 space-y-4 animate-sheet-up" onclick="event.stopPropagation()">
-            <div class="w-10 h-1.5 rounded-full mx-auto mb-1" style="background: var(--divider-color);"></div>
-
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 rounded-[18px] bg-[#007AFF] flex items-center justify-center text-white text-lg shadow-sm">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-primary-ios">Синхронизация с Supabase</h3>
-                        <p id="authSubtitle" class="text-xs text-tertiary-ios">Вход или регистрация по логину и паролю</p>
-                    </div>
-                </div>
-                <button onclick="closeModal('authModal')" class="w-8 h-8 rounded-full flex items-center justify-center text-tertiary-ios" style="background: var(--surface-pill);">
-                    <i class="fa-solid fa-xmark text-sm"></i>
-                </button>
-            </div>
-
-            <!-- Segmented control for Login / Register -->
-            <div class="ios27-segmented grid grid-cols-2 text-xs font-semibold text-secondary-ios">
-                <button onclick="switchAuthMode('login')" id="authTabLogin" class="ios27-segment-btn py-2 active">Вход</button>
-                <button onclick="switchAuthMode('register')" id="authTabRegister" class="ios27-segment-btn py-2">Регистрация</button>
-            </div>
-
-            <div class="space-y-3">
-                <div>
-                    <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Логин или Email</label>
-                    <input type="text" id="authLoginInput" placeholder="username или email@domain.com" 
-                        class="w-full py-3 px-4 rounded-2xl ios27-input text-sm">
-                </div>
-                <div>
-                    <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Пароль</label>
-                    <input type="password" id="authPasswordInput" placeholder="••••••••" 
-                        class="w-full py-3 px-4 rounded-2xl ios27-input text-sm">
-                </div>
-            </div>
-
-            <div id="authActionsContainer" class="space-y-2">
-                <button onclick="handleAuthSubmit()" id="authSubmitBtn" class="w-full py-3.5 rounded-2xl bg-[#007AFF] text-white font-semibold text-base shadow-sm active:scale-[0.98]">
-                    Войти в аккаунт
-                </button>
-                <button onclick="handleLogout()" id="logoutBtn" class="hidden w-full py-3 rounded-2xl bg-[#FF3B30]/12 text-[#FF3B30] font-semibold text-sm">
-                    Выйти из аккаунта
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Expense Modal -->
     <div id="expenseModal" class="fixed inset-0 bg-black/35 backdrop-blur-[3px] z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'expenseModal')">
@@ -602,21 +607,6 @@
                 <button onclick="closeModal('settingsModal')" class="w-8 h-8 rounded-full flex items-center justify-center text-tertiary-ios" style="background: var(--surface-pill);">
                     <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
-            </div>
-
-            <!-- Supabase Connection Settings -->
-            <div class="ios27-glass p-3.5 space-y-2.5">
-                <div class="flex justify-between items-center">
-                    <span class="text-xs font-bold text-primary-ios">Supabase Подключение</span>
-                    <button onclick="openAuthModal()" class="text-xs font-semibold text-[#007AFF]">Аккаунт</button>
-                </div>
-                <div class="space-y-2">
-                    <input type="text" id="supabaseUrlInput" placeholder="Supabase Project URL" 
-                        class="w-full py-2 px-3 rounded-xl ios27-input text-xs">
-                    <input type="password" id="supabaseKeyInput" placeholder="Supabase Anon / Public Key" 
-                        class="w-full py-2 px-3 rounded-xl ios27-input text-xs">
-                    <button onclick="saveSupabaseConfig()" class="w-full py-2 rounded-xl bg-[#007AFF] text-white text-xs font-semibold">Сохранить и подключить</button>
-                </div>
             </div>
 
             <div class="space-y-1.5">
@@ -896,17 +886,18 @@
     </div>
 
     <script>
-        // --- SUPABASE CLIENT SETUP ---
+        // --- HARDCODED SUPABASE CLIENT SETUP ---
+        const SUPABASE_URL = 'https://araeagnsbsjlnraiwpxv.supabase.co';
+        const SUPABASE_KEY = 'sb_secret_6Sm9szwDkojUJe8zyQ9H_w_2ZLoQoZr';
+
         let supabaseClient = null;
         let currentUser = null;
         let authMode = 'login'; // 'login' or 'register'
 
         function initSupabase() {
-            const url = localStorage.getItem('supabase_url') || '';
-            const key = localStorage.getItem('supabase_key') || '';
-            if (url && key && window.supabase) {
+            if (window.supabase) {
                 try {
-                    supabaseClient = window.supabase.createClient(url, key);
+                    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                     checkAuthSession();
                 } catch (e) {
                     console.error('Supabase init error:', e);
@@ -914,44 +905,52 @@
             }
         }
 
-        function saveSupabaseConfig() {
-            const url = document.getElementById('supabaseUrlInput').value.trim();
-            const key = document.getElementById('supabaseKeyInput').value.trim();
-            localStorage.setItem('supabase_url', url);
-            localStorage.setItem('supabase_key', key);
-            initSupabase();
-            showToast('Настройки Supabase сохранены');
-            closeModal('settingsModal');
-        }
-
         async function checkAuthSession() {
             if (!supabaseClient) return;
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session && session.user) {
-                currentUser = session.user;
-                updateAuthUI(true);
-                loadCloudData();
-            } else {
-                currentUser = null;
-                updateAuthUI(false);
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session && session.user) {
+                    currentUser = session.user;
+                    updateProfileUI(true);
+                    loadCloudData();
+                } else {
+                    currentUser = null;
+                    updateProfileUI(false);
+                }
+            } catch (e) {
+                console.error('Session check error:', e);
             }
         }
 
-        function updateAuthUI(isLoggedIn) {
-            const label = document.getElementById('authStatusLabel');
-            const submitBtn = document.getElementById('authSubmitBtn');
-            const logoutBtn = document.getElementById('logoutBtn');
+        function updateProfileUI(isLoggedIn) {
+            const headerLabel = document.getElementById('authStatusHeaderLabel');
+            const profileTitle = document.getElementById('profileTitle');
+            const profileSubtitle = document.getElementById('profileSubtitle');
+            const authContainer = document.getElementById('profileAuthContainer');
+            const logoutContainer = document.getElementById('profileLogoutContainer');
+            const avatarIcon = document.getElementById('profileAvatarIcon');
 
             if (isLoggedIn && currentUser) {
-                label.innerText = `Аккаунт: ${currentUser.email}`;
-                label.className = "text-[10px] font-semibold text-[#34C759] mt-1 cursor-pointer hover:underline";
-                submitBtn.innerText = "Обновить синхронизацию";
-                logoutBtn.classList.remove('hidden');
+                const nickname = currentUser.email ? currentUser.email.split('@')[0] : 'Пользователь';
+                headerLabel.innerText = `@${nickname}`;
+                headerLabel.className = "text-[10px] font-semibold text-[#34C759] mt-1 cursor-pointer hover:underline";
+                
+                profileTitle.innerText = `@${nickname}`;
+                profileSubtitle.innerText = 'Аккаунт активен и синхронизируется с облаком';
+                avatarIcon.className = "w-14 h-14 rounded-[22px] bg-[#34C759] flex items-center justify-center text-white text-xl shadow-sm";
+                
+                authContainer.classList.add('hidden');
+                logoutContainer.classList.remove('hidden');
             } else {
-                label.innerText = "Локальный режим (нажмите для входа)";
-                label.className = "text-[10px] font-medium text-tertiary-ios mt-1 cursor-pointer hover:underline";
-                submitBtn.innerText = authMode === 'login' ? "Войти в аккаунт" : "Зарегистрироваться";
-                logoutBtn.classList.add('hidden');
+                headerLabel.innerText = "Локальный режим";
+                headerLabel.className = "text-[10px] font-medium text-tertiary-ios mt-1 cursor-pointer hover:underline";
+                
+                profileTitle.innerText = "Локальный режим";
+                profileSubtitle.innerText = 'Войдите или зарегистрируйтесь по нику и паролю';
+                avatarIcon.className = "w-14 h-14 rounded-[22px] bg-[#007AFF] flex items-center justify-center text-white text-xl shadow-sm";
+                
+                authContainer.classList.remove('hidden');
+                logoutContainer.classList.add('hidden');
             }
         }
 
@@ -960,58 +959,41 @@
             document.getElementById('authTabLogin').classList.toggle('active', mode === 'login');
             document.getElementById('authTabRegister').classList.toggle('active', mode === 'register');
             document.getElementById('authSubmitBtn').innerText = mode === 'login' ? "Войти в аккаунт" : "Зарегистрироваться";
-            document.getElementById('authSubtitle').innerText = mode === 'login' ? "Вход по логину/email и паролю" : "Регистрация нового аккаунта";
-        }
-
-        function openAuthModal() {
-            const url = localStorage.getItem('supabase_url') || '';
-            const key = localStorage.getItem('supabase_key') || '';
-            if (!url || !key) {
-                showToast('Сначала укажите URL и Key Supabase в настройках');
-                openModal('settingsModal');
-                return;
-            }
-            openModal('authModal');
         }
 
         async function handleAuthSubmit() {
             if (!supabaseClient) {
-                showToast('Supabase не настроен');
+                showToast('Ошибка инициализации базы данных');
                 return;
             }
-            const loginInput = document.getElementById('authLoginInput').value.trim();
+            const nicknameInput = document.getElementById('authNicknameInput').value.trim().toLowerCase();
             const password = document.getElementById('authPasswordInput').value.trim();
 
-            if (!loginInput || !password) {
-                showToast('Заполните все поля');
+            if (!nicknameInput || !password) {
+                showToast('Заполните никнейм и пароль');
                 return;
             }
 
-            // Support both username and email login (if username, append a standard domain suffix for Supabase email auth)
-            let email = loginInput;
-            if (!email.includes('@')) {
-                email = `${loginInput.toLowerCase()}@budget.app`;
-            }
+            // Convert nickname to internal email format for Supabase Auth
+            const email = `${nicknameInput}@budget.app`;
 
             if (authMode === 'register') {
                 const { data, error } = await supabaseClient.auth.signUp({ email, password });
                 if (error) {
-                    showToast('Ошибка регистрации: ' + error.message);
+                    showToast('Ошибка: ' + error.message);
                 } else {
                     currentUser = data.user;
-                    updateAuthUI(true);
-                    closeModal('authModal');
+                    updateProfileUI(true);
                     showToast('Регистрация успешна!');
                     saveCloudData();
                 }
             } else {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) {
-                    showToast('Ошибка входа: ' + error.message);
+                    showToast('Ошибка входа: неверный ник или пароль');
                 } else {
                     currentUser = data.user;
-                    updateAuthUI(true);
-                    closeModal('authModal');
+                    updateProfileUI(true);
                     showToast('Вход выполнен!');
                     loadCloudData();
                 }
@@ -1022,8 +1004,7 @@
             if (!supabaseClient) return;
             await supabaseClient.auth.signOut();
             currentUser = null;
-            updateAuthUI(false);
-            closeModal('authModal');
+            updateProfileUI(false);
             showToast('Выход из аккаунта');
         }
 
@@ -1052,7 +1033,7 @@
                 if (data && data.state_data) {
                     state = { ...state, ...data.state_data };
                     renderAll();
-                    showToast('Данные синхронизированы с облаком');
+                    showToast('Данные загружены из облака');
                 }
             } catch (e) {
                 console.error('Cloud load error:', e);
@@ -1095,11 +1076,6 @@
             loadState();
             applyTheme(state.theme);
             
-            const savedUrl = localStorage.getItem('supabase_url') || '';
-            const savedKey = localStorage.getItem('supabase_key') || '';
-            if (document.getElementById('supabaseUrlInput')) document.getElementById('supabaseUrlInput').value = savedUrl;
-            if (document.getElementById('supabaseKeyInput')) document.getElementById('supabaseKeyInput').value = savedKey;
-
             initSupabase();
 
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
@@ -1176,15 +1152,19 @@
 
         function switchTab(tabName) {
             activeTab = tabName;
-            ['home', 'analytics', 'history'].forEach(t => {
-                document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tabName);
+            ['home', 'analytics', 'history', 'profile'].forEach(t => {
+                const tabEl = document.getElementById(`tab-${t}`);
+                if (tabEl) tabEl.classList.toggle('hidden', t !== tabName);
+                
                 const btn = document.getElementById(`nav-${t}`);
-                if (t === tabName) {
-                    btn.classList.add('active');
-                    btn.classList.remove('text-tertiary-ios');
-                } else {
-                    btn.classList.remove('active');
-                    btn.classList.add('text-tertiary-ios');
+                if (btn) {
+                    if (t === tabName) {
+                        btn.classList.add('active');
+                        btn.classList.remove('text-tertiary-ios');
+                    } else {
+                        btn.classList.remove('active');
+                        btn.classList.add('text-tertiary-ios');
+                    }
                 }
             });
 
