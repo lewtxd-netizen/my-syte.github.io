@@ -9,8 +9,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Бюджет">
-    <meta name="theme-color" id="metaThemeColor" content="#EBF2FA">
-    <link rel="apple-touch-icon" href="https://api.iconify.design/lucide:banknote.svg?color=%2334C759&width=180">
+    <meta name="theme-color" id="metaThemeColor" content="#0B0E17">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,6 +17,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script>
         tailwind.config = {
@@ -33,20 +34,44 @@
     </script>
     
     <style>
-        /* ==================== iOS 27 LIQUID GLASS 2.0 DESIGN TOKENS ==================== */
+        /* ==================== iOS 27 LIQUID GLASS 3.0 TOKENS ==================== */
         :root {
-            --bg-wallpaper: linear-gradient(155deg, #E6F0FD 0%, #F4F2FF 48%, #FCEEE9 100%);
-            --blob-1: rgba(154, 204, 255, 0.85);
-            --blob-2: rgba(214, 202, 255, 0.80);
-            --blob-3: rgba(255, 214, 194, 0.75);
+            --bg-wallpaper: linear-gradient(155deg, #070A14 0%, #101424 50%, #0A0D18 100%);
+            --blob-1: rgba(30, 80, 190, 0.48);
+            --blob-2: rgba(85, 45, 175, 0.42);
+            --blob-3: rgba(20, 110, 125, 0.38);
             
-            --glass-bg: rgba(255, 255, 255, 0.64);
+            --glass-bg: rgba(28, 30, 38, 0.52);
+            --glass-bg-elevated: rgba(40, 43, 52, 0.68);
+            --glass-tile-bg: rgba(34, 37, 45, 0.50);
+            --glass-tile-active: rgba(52, 56, 68, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --glass-specular: inset 0 2px 1px rgba(255, 255, 255, 0.25), inset 0 -1.5px 1.5px rgba(255, 255, 255, 0.05);
+            --glass-shadow: 0 22px 55px rgba(0, 0, 0, 0.48), 0 4px 16px rgba(0, 0, 0, 0.28);
+            
+            --text-primary: #FFFFFF;
+            --text-secondary: #AEAEB2;
+            --text-tertiary: #8E8E93;
+            --surface-pill: rgba(118, 118, 128, 0.24);
+            --divider-color: rgba(255, 255, 255, 0.10);
+            --input-bg: rgba(40, 42, 50, 0.75);
+            --sheet-bg: rgba(22, 24, 30, 0.92);
+            --dock-bg: rgba(28, 31, 39, 0.65);
+        }
+
+        html:not(.dark) {
+            --bg-wallpaper: linear-gradient(155deg, #D4E4FC 0%, #EDE9FF 48%, #FFE4DD 100%);
+            --blob-1: rgba(134, 194, 255, 0.9);
+            --blob-2: rgba(204, 188, 255, 0.85);
+            --blob-3: rgba(255, 198, 178, 0.8);
+            
+            --glass-bg: rgba(255, 255, 255, 0.52);
             --glass-bg-elevated: rgba(255, 255, 255, 0.78);
-            --glass-tile-bg: rgba(255, 255, 255, 0.56);
+            --glass-tile-bg: rgba(255, 255, 255, 0.46);
             --glass-tile-active: rgba(255, 255, 255, 0.88);
-            --glass-border: rgba(255, 255, 255, 0.78);
-            --glass-specular: inset 0 1.5px 1px rgba(255, 255, 255, 0.95), inset 0 -1px 1px rgba(255, 255, 255, 0.35);
-            --glass-shadow: 0 12px 36px rgba(20, 35, 70, 0.06), 0 2px 8px rgba(20, 35, 70, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            --glass-specular: inset 0 2px 1px rgba(255, 255, 255, 0.98), inset 0 -1.5px 1.5px rgba(255, 255, 255, 0.45);
+            --glass-shadow: 0 20px 50px rgba(20, 35, 70, 0.12), 0 4px 12px rgba(20, 35, 70, 0.05);
             
             --text-primary: #1C1C1E;
             --text-secondary: #6C6C70;
@@ -54,32 +79,40 @@
             --surface-pill: rgba(118, 118, 128, 0.11);
             --divider-color: rgba(60, 60, 67, 0.08);
             --input-bg: rgba(255, 255, 255, 0.78);
-            --sheet-bg: rgba(248, 249, 252, 0.88);
-            --dock-bg: rgba(255, 255, 255, 0.72);
+            --sheet-bg: rgba(246, 248, 252, 0.94);
+            --dock-bg: rgba(255, 255, 255, 0.65);
         }
 
-        html.dark {
-            --bg-wallpaper: linear-gradient(155deg, #090C15 0%, #111526 50%, #0D111C 100%);
-            --blob-1: rgba(34, 88, 195, 0.42);
-            --blob-2: rgba(94, 58, 184, 0.36);
-            --blob-3: rgba(24, 122, 138, 0.32);
-            
-            --glass-bg: rgba(30, 32, 38, 0.56);
-            --glass-bg-elevated: rgba(42, 45, 54, 0.72);
-            --glass-tile-bg: rgba(36, 39, 47, 0.54);
-            --glass-tile-active: rgba(56, 60, 72, 0.78);
-            --glass-border: rgba(255, 255, 255, 0.16);
-            --glass-specular: inset 0 1.5px 1px rgba(255, 255, 255, 0.22), inset 0 -1px 1px rgba(255, 255, 255, 0.04);
-            --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.42), 0 2px 10px rgba(0, 0, 0, 0.25);
-            
-            --text-primary: #FFFFFF;
-            --text-secondary: #AEAEB2;
-            --text-tertiary: #8E8E93;
-            --surface-pill: rgba(118, 118, 128, 0.24);
-            --divider-color: rgba(255, 255, 255, 0.10);
-            --input-bg: rgba(44, 46, 54, 0.75);
-            --sheet-bg: rgba(26, 28, 34, 0.88);
-            --dock-bg: rgba(32, 35, 43, 0.72);
+        /* 5 Wallpaper Presets */
+        body[data-wallpaper="1"] {
+            --bg-wallpaper: linear-gradient(155deg, #070A14 0%, #101424 50%, #0A0D18 100%);
+            --blob-1: rgba(30, 80, 190, 0.48);
+            --blob-2: rgba(85, 45, 175, 0.42);
+            --blob-3: rgba(20, 110, 125, 0.38);
+        }
+        body[data-wallpaper="2"] {
+            --bg-wallpaper: linear-gradient(155deg, #022C22 0%, #064E3B 50%, #02231E 100%);
+            --blob-1: rgba(5, 150, 105, 0.45);
+            --blob-2: rgba(13, 148, 136, 0.4);
+            --blob-3: rgba(4, 47, 46, 0.5);
+        }
+        body[data-wallpaper="3"] {
+            --bg-wallpaper: linear-gradient(155deg, #451A03 0%, #78350F 50%, #422006 100%);
+            --blob-1: rgba(180, 83, 9, 0.48);
+            --blob-2: rgba(146, 64, 14, 0.42);
+            --blob-3: rgba(120, 53, 15, 0.38);
+        }
+        body[data-wallpaper="4"] {
+            --bg-wallpaper: linear-gradient(155deg, #2E1065 0%, #4C1D95 50%, #1E1B4B 100%);
+            --blob-1: rgba(109, 40, 217, 0.48);
+            --blob-2: rgba(126, 34, 206, 0.42);
+            --blob-3: rgba(76, 29, 149, 0.38);
+        }
+        body[data-wallpaper="5"] {
+            --bg-wallpaper: linear-gradient(155deg, #0F172A 0%, #1E293B 50%, #090D16 100%);
+            --blob-1: rgba(51, 65, 85, 0.5);
+            --blob-2: rgba(30, 41, 59, 0.5);
+            --blob-3: rgba(15, 23, 42, 0.5);
         }
 
         body {
@@ -89,7 +122,7 @@
             -webkit-tap-highlight-color: transparent;
             user-select: none;
             -webkit-font-smoothing: antialiased;
-            transition: color 0.35s ease;
+            transition: color 0.4s ease, background 0.5s ease;
         }
 
         .ios27-wallpaper {
@@ -98,128 +131,128 @@
             z-index: 0;
             pointer-events: none;
             background: var(--bg-wallpaper);
-            transition: background 0.5s ease;
+            transition: background 0.6s ease;
             overflow: hidden;
         }
 
         .liquid-orb {
             position: absolute;
             border-radius: 50%;
-            filter: blur(90px);
-            animation: orbDrift 20s ease-in-out infinite alternate;
-            transition: background 0.5s ease;
+            filter: blur(95px);
+            animation: orbDrift 24s ease-in-out infinite alternate;
+            transition: background 0.6s ease;
         }
 
-        .orb-1 {
-            top: -12%;
-            left: -18%;
-            width: 88vw;
-            height: 88vw;
-            background: radial-gradient(circle, var(--blob-1) 0%, transparent 72%);
-        }
-
-        .orb-2 {
-            top: 30%;
-            right: -25%;
-            width: 92vw;
-            height: 92vw;
-            background: radial-gradient(circle, var(--blob-2) 0%, transparent 72%);
-            animation-delay: -7s;
-        }
-
-        .orb-3 {
-            bottom: -12%;
-            left: -10%;
-            width: 85vw;
-            height: 85vw;
-            background: radial-gradient(circle, var(--blob-3) 0%, transparent 72%);
-            animation-delay: -13s;
-        }
+        .orb-1 { top: -12%; left: -18%; width: 88vw; height: 88vw; background: radial-gradient(circle, var(--blob-1) 0%, transparent 72%); }
+        .orb-2 { top: 32%; right: -25%; width: 92vw; height: 92vw; background: radial-gradient(circle, var(--blob-2) 0%, transparent 72%); animation-delay: -7s; }
+        .orb-3 { bottom: -12%; left: -10%; width: 85vw; height: 85vw; background: radial-gradient(circle, var(--blob-3) 0%, transparent 72%); animation-delay: -13s; }
 
         @keyframes orbDrift {
             0% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(22px, -18px) scale(1.07); }
-            100% { transform: translate(-16px, 20px) scale(0.96); }
+            50% { transform: translate(24px, -20px) scale(1.08); }
+            100% { transform: translate(-18px, 22px) scale(0.95); }
         }
 
         .ios27-glass {
             background: var(--glass-bg);
-            backdrop-filter: blur(36px) saturate(210%);
-            -webkit-backdrop-filter: blur(36px) saturate(210%);
+            backdrop-filter: blur(48px) saturate(260%);
+            -webkit-backdrop-filter: blur(48px) saturate(260%);
             border: 1px solid var(--glass-border);
             box-shadow: var(--glass-shadow), var(--glass-specular);
-            border-radius: 30px;
-            transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+            border-radius: 32px;
+            transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
         }
 
         .ios27-tile {
             background: var(--glass-tile-bg);
-            backdrop-filter: blur(28px) saturate(200%);
-            -webkit-backdrop-filter: blur(28px) saturate(200%);
+            backdrop-filter: blur(32px) saturate(220%);
+            -webkit-backdrop-filter: blur(32px) saturate(220%);
             border: 1px solid var(--glass-border);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04), var(--glass-specular);
-            border-radius: 24px;
-            transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, border-color 0.35s ease;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05), var(--glass-specular);
+            border-radius: 26px;
+            transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.25s ease, border-color 0.4s ease;
         }
 
-        .ios27-tile:active {
-            transform: scale(0.92);
-            background: var(--glass-tile-active);
-        }
+        .ios27-tile:active { transform: scale(0.93); background: var(--glass-tile-active); }
 
         .ios27-pill-btn {
             background: var(--glass-tile-bg);
-            backdrop-filter: blur(24px) saturate(190%);
-            -webkit-backdrop-filter: blur(24px) saturate(190%);
+            backdrop-filter: blur(28px) saturate(200%);
+            -webkit-backdrop-filter: blur(28px) saturate(200%);
             border: 1px solid var(--glass-border);
             box-shadow: var(--glass-specular);
             transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s ease;
         }
 
-        .ios27-pill-btn:active {
-            transform: scale(0.92);
-        }
+        .ios27-pill-btn:active { transform: scale(0.92); }
 
         .ios27-dock {
             background: var(--dock-bg);
-            backdrop-filter: blur(38px) saturate(220%);
-            -webkit-backdrop-filter: blur(38px) saturate(220%);
+            backdrop-filter: blur(48px) saturate(240%);
+            -webkit-backdrop-filter: blur(48px) saturate(240%);
             border: 1px solid var(--glass-border);
-            box-shadow: 0 14px 38px rgba(0, 0, 0, 0.14), var(--glass-specular);
-            border-radius: 32px;
-            transition: background 0.35s ease, border-color 0.35s ease;
+            box-shadow: 0 16px 42px rgba(0, 0, 0, 0.16), var(--glass-specular);
+            border-radius: 34px;
+            position: relative;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .dock-sliding-pill {
+            position: absolute;
+            top: 4px;
+            bottom: 4px;
+            background: rgba(10, 132, 255, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 26px;
+            transition: left 0.65s cubic-bezier(0.16, 1, 0.3, 1), width 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2);
+            left: 4px;
         }
 
         .dock-tab-btn {
-            border-radius: 24px;
-            transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border-radius: 26px;
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            transition: color 0.35s ease;
+            width: 100%;
         }
 
-        .dock-tab-btn.active {
-            background: rgba(0, 122, 255, 0.14);
-            color: #007AFF;
-        }
-
-        html.dark .dock-tab-btn.active {
-            background: rgba(10, 132, 255, 0.22);
-            color: #0A84FF;
-        }
+        .dock-tab-btn.active { color: #0A84FF; }
 
         .ios27-sheet {
             background: var(--sheet-bg);
-            backdrop-filter: blur(42px) saturate(210%);
-            -webkit-backdrop-filter: blur(42px) saturate(210%);
+            backdrop-filter: blur(48px) saturate(220%);
+            -webkit-backdrop-filter: blur(48px) saturate(220%);
             border-top: 1px solid var(--glass-border);
-            box-shadow: 0 -12px 44px rgba(0, 0, 0, 0.18), var(--glass-specular);
-            border-top-left-radius: 32px;
-            border-top-right-radius: 32px;
+            box-shadow: 0 -16px 48px rgba(0, 0, 0, 0.2), var(--glass-specular);
+            border-top-left-radius: 34px;
+            border-top-right-radius: 34px;
+            transform: translate3d(0, 0, 0);
+            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform;
+        }
+
+        .fixed.opacity-0 .ios27-sheet,
+        .fixed.opacity-0 > div {
+            transform: translate3d(0, 100%, 0);
         }
 
         .ios27-input {
             background: var(--input-bg);
             border: 1px solid var(--glass-border);
             color: var(--text-primary);
-            transition: all 0.2s ease;
+            transition: all 0.25s ease;
         }
 
         .ios27-input:focus {
@@ -230,24 +263,73 @@
 
         .ios27-segmented {
             background: var(--surface-pill);
-            border-radius: 14px;
+            border-radius: 16px;
             padding: 3px;
+            position: relative;
+        }
+
+        .theme-sliding-pill {
+            position: absolute;
+            top: 3px;
+            bottom: 3px;
+            background: var(--glass-bg-elevated);
+            border-radius: 13px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12), var(--glass-specular);
+            transition: left 0.45s cubic-bezier(0.16, 1, 0.3, 1), width 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            z-index: 1;
         }
 
         .ios27-segment-btn {
-            border-radius: 11px;
-            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border-radius: 13px;
+            position: relative;
+            z-index: 2;
+            transition: color 0.3s ease;
         }
 
-        .ios27-segment-btn.active {
-            background: var(--glass-bg-elevated);
-            color: var(--text-primary);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        .ios27-segment-btn.active { color: var(--text-primary); }
+
+        @keyframes sequentialFadeUp {
+            0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .animate-stagger-1 { animation: sequentialFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.04s forwards; opacity: 0; }
+        .animate-stagger-2 { animation: sequentialFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards; opacity: 0; }
+        .animate-stagger-3 { animation: sequentialFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.16s forwards; opacity: 0; }
+        .animate-stagger-4 { animation: sequentialFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.22s forwards; opacity: 0; }
+
+        .category-tile-item {
+            opacity: 0;
+            animation: sequentialFadeUp 0.48s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            touch-action: manipulation;
+        }
+
+        @keyframes iosJiggle {
+            0% { transform: rotate(-1.6deg) translateY(0px); }
+            50% { transform: rotate(1.6deg) translateY(-1px); }
+            100% { transform: rotate(-1.6deg) translateY(0px); }
+        }
+
+        .tile-jiggle {
+            opacity: 1 !important;
+            animation: iosJiggle 0.26s ease-in-out infinite !important;
+            touch-action: none !important;
+            cursor: grab;
+        }
+
+        .tile-dragging {
+            opacity: 0.88 !important;
+            transform: scale(1.07) !important;
+            z-index: 40 !important;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28), var(--glass-specular) !important;
+            animation: none !important;
+            cursor: grabbing !important;
         }
 
         .ios-pt { padding-top: max(14px, env(safe-area-inset-top)); }
         .ios-dock-bottom { bottom: max(14px, env(safe-area-inset-bottom)); }
-        .main-scroll-pb { padding-bottom: calc(106px + env(safe-area-inset-bottom)); }
+        .main-scroll-pb { padding-bottom: calc(112px + env(safe-area-inset-top)); }
 
         .text-primary-ios { color: var(--text-primary); }
         .text-secondary-ios { color: var(--text-secondary); }
@@ -258,17 +340,9 @@
         }
 
         ::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
-
-        @keyframes sheetSlideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-        .animate-sheet-up {
-            animation: sheetSlideUp 0.34s cubic-bezier(0.32, 0.72, 0, 1) forwards;
-        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center relative">
+<body data-wallpaper="1" class="min-h-screen flex flex-col items-center relative dark">
 
     <div class="ios27-wallpaper">
         <div class="liquid-orb orb-1"></div>
@@ -278,10 +352,10 @@
 
     <main class="w-full max-w-md min-h-screen flex flex-col relative z-10 px-4 ios-pt main-scroll-pb">
         
-        <header class="flex justify-between items-center py-2.5 mb-3">
+        <header class="flex justify-between items-center py-2.5 mb-3 animate-stagger-1">
             <div class="flex items-center space-x-3">
-                <div class="w-11 h-11 rounded-[15px] ios27-glass flex items-center justify-center shadow-sm relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-[#34C759]/25 to-[#30D158]/10"></div>
+                <div class="w-11 h-11 rounded-[16px] ios27-glass flex items-center justify-center shadow-sm relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-[#34C759]/30 to-[#30D158]/10"></div>
                     <i class="fa-solid fa-money-bill-wave text-[#34C759] text-lg relative z-10"></i>
                 </div>
                 <div>
@@ -291,9 +365,9 @@
             </div>
             
             <div class="flex items-center space-x-2">
-                <button onclick="cycleTheme()" id="themeToggleBtn" class="ios27-pill-btn h-10 px-3 rounded-full flex items-center space-x-1.5 text-primary-ios" title="Сменить тему">
-                    <i id="themeIcon" class="fa-solid fa-circle-half-stroke text-sm text-[#007AFF]"></i>
-                    <span id="themeLabel" class="text-xs font-semibold">Авто</span>
+                <button onclick="toggleTheme()" id="themeToggleBtn" class="ios27-pill-btn h-10 px-3.5 rounded-full flex items-center space-x-1.5 text-primary-ios" title="Сменить тему">
+                    <i id="themeIcon" class="fa-solid fa-moon text-sm text-[#5E5CE6]"></i>
+                    <span id="themeLabel" class="text-xs font-semibold">Тёмная</span>
                 </button>
 
                 <button onclick="openModal('settingsModal')" class="ios27-pill-btn w-10 h-10 rounded-full flex items-center justify-center text-primary-ios" title="Настройки">
@@ -305,16 +379,19 @@
         <!-- ==================== TAB 1: ГЛАВНАЯ ==================== -->
         <div id="tab-home" class="space-y-4">
             
-            <section class="ios27-glass p-5 space-y-4 relative overflow-hidden">
-                <div class="flex justify-between items-start gap-2">
-                    <div class="min-w-0">
-                        <p class="text-xs font-medium text-secondary-ios">Остаток бюджета</p>
-                        <div id="balanceAmount" class="text-[36px] font-bold tracking-tight text-primary-ios leading-tight mt-0.5 truncate">
+            <section class="ios27-glass p-5 space-y-4 relative overflow-hidden animate-stagger-1">
+                <div class="flex justify-between items-center gap-2">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center space-x-1.5 flex-wrap">
+                            <p class="text-xs font-medium text-secondary-ios">Остаток бюджета</p>
+                            <button onclick="openBudgetStartDateModal()" class="text-[10px] font-semibold text-[#007AFF] px-2 py-0.5 rounded-full bg-[#007AFF]/12 hover:bg-[#007AFF]/20 transition whitespace-nowrap" id="budgetPeriodLabel">С 1-го числа</button>
+                        </div>
+                        <div id="balanceAmount" class="text-[34px] font-bold tracking-tight text-primary-ios leading-tight mt-1 whitespace-nowrap">
                             0 ₽
                         </div>
                     </div>
-                    <button onclick="openIncomeModal()" class="bg-[#007AFF] active:bg-[#0062CC] text-white px-3.5 py-2.5 rounded-full text-xs font-semibold flex items-center space-x-1.5 shadow-sm shrink-0 transition-transform active:scale-95">
-                        <i class="fa-solid fa-plus text-[11px]"></i>
+                    <button onclick="openIncomeModal()" class="bg-[#007AFF] active:bg-[#0062CC] text-white px-2.5 py-1.5 rounded-full text-[11px] font-semibold flex items-center space-x-1 shadow-sm shrink-0 transition-transform active:scale-95">
+                        <i class="fa-solid fa-plus text-[9px]"></i>
                         <span>Зарплата / Доход</span>
                     </button>
                 </div>
@@ -328,7 +405,7 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-2.5 pt-0.5">
-                    <div class="rounded-[20px] p-3 flex items-center space-x-2.5 border" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
+                    <div class="rounded-[22px] p-3 flex items-center space-x-2.5 border" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
                         <div class="w-8 h-8 rounded-full bg-[#34C759]/18 text-[#34C759] flex items-center justify-center text-xs shrink-0">
                             <i class="fa-solid fa-arrow-down"></i>
                         </div>
@@ -337,7 +414,7 @@
                             <p id="totalIncomeText" class="text-sm font-bold text-primary-ios truncate">0 ₽</p>
                         </div>
                     </div>
-                    <div class="rounded-[20px] p-3 flex items-center space-x-2.5 border" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
+                    <div class="rounded-[22px] p-3 flex items-center space-x-2.5 border" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
                         <div class="w-8 h-8 rounded-full bg-[#FF3B30]/18 text-[#FF3B30] flex items-center justify-center text-xs shrink-0">
                             <i class="fa-solid fa-arrow-up"></i>
                         </div>
@@ -349,22 +426,25 @@
                 </div>
             </section>
 
-            <section class="space-y-2.5">
+            <section class="space-y-2.5 animate-stagger-2">
                 <div class="flex justify-between items-center px-1">
                     <h2 class="text-[18px] font-bold text-primary-ios tracking-tight">Статьи расходов</h2>
-                    <button onclick="openCustomCategoryModal()" class="text-xs font-semibold text-[#007AFF] active:opacity-60 flex items-center space-x-1">
-                        <i class="fa-solid fa-plus text-[10px]"></i>
-                        <span>Своя</span>
-                    </button>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="toggleCategoryEditMode()" id="categoryEditToggleBtn" class="text-xs font-semibold text-secondary-ios px-2.5 py-1 rounded-xl" style="background: var(--surface-pill);">Изм.</button>
+                        <button onclick="openCustomCategoryModal()" class="text-xs font-semibold text-[#007AFF] active:opacity-60 flex items-center space-x-1">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                            <span>Своя</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div id="categoriesGrid" class="grid grid-cols-3 gap-2.5"></div>
             </section>
 
-            <section onclick="openModal('creditsModal')" class="ios27-glass p-4 cursor-pointer active:scale-[0.98] transition-transform space-y-2.5">
+            <section onclick="openModal('creditsModal')" class="ios27-glass p-4 cursor-pointer active:scale-[0.98] transition-transform space-y-2.5 animate-stagger-3">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-[15px] flex items-center justify-center text-white bg-gradient-to-br from-[#5E5CE6] to-[#0A84FF] shadow-xs">
+                        <div class="w-10 h-10 rounded-[16px] flex items-center justify-center text-white bg-gradient-to-br from-[#5E5CE6] to-[#0A84FF] shadow-xs">
                             <i class="fa-solid fa-credit-card text-sm"></i>
                         </div>
                         <div>
@@ -384,7 +464,7 @@
                 </div>
             </section>
 
-            <section class="ios27-glass p-4 space-y-2.5">
+            <section class="ios27-glass p-4 space-y-2.5 animate-stagger-4">
                 <div class="flex justify-between items-center px-0.5">
                     <h3 class="text-[16px] font-bold text-primary-ios">Последние операции</h3>
                     <button onclick="switchTab('history')" class="text-xs font-semibold text-[#007AFF]">Все</button>
@@ -396,7 +476,7 @@
 
         <!-- ==================== TAB 2: АНАЛИТИКА ==================== -->
         <div id="tab-analytics" class="hidden space-y-4">
-            <section class="ios27-glass p-5 space-y-4">
+            <section class="ios27-glass p-5 space-y-4 animate-stagger-1">
                 <div class="flex justify-between items-center">
                     <div>
                         <h2 class="text-lg font-bold text-primary-ios">Структура расходов</h2>
@@ -405,10 +485,12 @@
                     <span id="analyticsTotalBadge" class="px-3 py-1.5 rounded-full text-xs font-bold text-primary-ios" style="background: var(--surface-pill);">0 ₽</span>
                 </div>
 
-                <div class="relative h-56 w-full flex items-center justify-center my-1" id="donutChartContainer"></div>
+                <div class="relative h-60 w-full flex items-center justify-center my-2" id="donutChartContainer">
+                    <canvas id="analyticsDonutCanvas"></canvas>
+                </div>
             </section>
 
-            <section class="ios27-glass p-5 space-y-4">
+            <section class="ios27-glass p-5 space-y-4 animate-stagger-2">
                 <h3 class="text-[16px] font-bold text-primary-ios">Детализация по статьям</h3>
                 <div id="analyticsBreakdownList" class="space-y-3.5"></div>
             </section>
@@ -416,7 +498,7 @@
 
         <!-- ==================== TAB 3: ИСТОРИЯ ==================== -->
         <div id="tab-history" class="hidden space-y-4">
-            <div class="ios27-glass p-3.5 space-y-3">
+            <div class="ios27-glass p-3.5 space-y-3 animate-stagger-1">
                 <div class="relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-tertiary-ios text-xs"></i>
                     <input type="text" id="historySearchInput" oninput="renderHistoryTab()" placeholder="Поиск по заметке или категории..." 
@@ -426,7 +508,7 @@
                 <div id="historyFilterPills" class="flex space-x-1.5 overflow-x-auto pb-0.5"></div>
             </div>
 
-            <section class="ios27-glass p-4 space-y-2">
+            <section class="ios27-glass p-4 space-y-2 animate-stagger-2">
                 <div class="flex justify-between items-center pb-1 px-0.5">
                     <span id="historyCountLabel" class="text-xs font-semibold text-tertiary-ios">0 операций</span>
                     <button onclick="openModal('resetModal')" class="text-xs font-semibold text-[#FF3B30]">Очистить</button>
@@ -437,7 +519,7 @@
 
         <!-- ==================== TAB 4: ПРОФИЛЬ ==================== -->
         <div id="tab-profile" class="hidden space-y-4">
-            <section class="ios27-glass p-5 space-y-4">
+            <section class="ios27-glass p-5 space-y-4 animate-stagger-1">
                 <div class="flex items-center space-x-3">
                     <div id="profileAvatarIcon" class="w-14 h-14 rounded-[22px] bg-[#007AFF] flex items-center justify-center text-white text-xl shadow-sm">
                         <i class="fa-solid fa-user"></i>
@@ -448,7 +530,6 @@
                     </div>
                 </div>
 
-                <!-- Not Logged In View -->
                 <div id="profileAuthContainer" class="space-y-3 pt-2">
                     <div class="ios27-segmented grid grid-cols-2 text-xs font-semibold text-secondary-ios">
                         <button onclick="switchAuthMode('login')" id="authTabLogin" class="ios27-segment-btn py-2 active">Вход</button>
@@ -473,7 +554,6 @@
                     </button>
                 </div>
 
-                <!-- Logged In View -->
                 <div id="profileLogoutContainer" class="hidden space-y-3 pt-2">
                     <div class="p-3.5 rounded-2xl border" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
                         <p class="text-xs text-secondary-ios">Аккаунт синхронизирован с облаком Supabase. Ваши операции и настройки хранятся в безопасности и доступны только вам.</p>
@@ -489,30 +569,29 @@
 
     <!-- 4-Tab Dock -->
     <nav class="fixed ios-dock-bottom inset-x-0 z-30 px-5 pointer-events-none">
-        <div class="max-w-[360px] mx-auto ios27-dock p-1.5 grid grid-cols-4 gap-1 pointer-events-auto">
-            <button onclick="switchTab('home')" id="nav-home" class="dock-tab-btn active py-2 flex flex-col items-center justify-center space-y-0.5">
+        <div class="max-w-[360px] mx-auto ios27-dock pointer-events-auto">
+            <div id="dockSlidingPill" class="dock-sliding-pill" style="transform: translateX(0%);"></div>
+            <button onclick="switchTab('home')" id="nav-home" class="dock-tab-btn active flex flex-col items-center justify-center space-y-0.5">
                 <i class="fa-solid fa-wallet text-base"></i>
                 <span class="text-[10px] font-semibold">Главная</span>
             </button>
-            <button onclick="switchTab('analytics')" id="nav-analytics" class="dock-tab-btn py-2 flex flex-col items-center justify-center space-y-0.5 text-tertiary-ios">
+            <button onclick="switchTab('analytics')" id="nav-analytics" class="dock-tab-btn flex flex-col items-center justify-center space-y-0.5 text-tertiary-ios">
                 <i class="fa-solid fa-chart-pie text-base"></i>
                 <span class="text-[10px] font-semibold">Аналитика</span>
             </button>
-            <button onclick="switchTab('history')" id="nav-history" class="dock-tab-btn py-2 flex flex-col items-center justify-center space-y-0.5 text-tertiary-ios">
+            <button onclick="switchTab('history')" id="nav-history" class="dock-tab-btn flex flex-col items-center justify-center space-y-0.5 text-tertiary-ios">
                 <i class="fa-solid fa-clock-rotate-left text-base"></i>
                 <span class="text-[10px] font-semibold">История</span>
             </button>
-            <button onclick="switchTab('profile')" id="nav-profile" class="dock-tab-btn py-2 flex flex-col items-center justify-center space-y-0.5 text-tertiary-ios">
+            <button onclick="switchTab('profile')" id="nav-profile" class="dock-tab-btn flex flex-col items-center justify-center space-y-0.5 text-tertiary-ios">
                 <i class="fa-solid fa-user text-base"></i>
                 <span class="text-[10px] font-semibold">Профиль</span>
             </button>
         </div>
     </nav>
 
-    <!-- ==================== MODALS & BOTTOM SHEETS ==================== -->
-
     <!-- Expense Modal -->
-    <div id="expenseModal" class="fixed inset-0 bg-black/35 backdrop-blur-[3px] z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'expenseModal')">
+    <div id="expenseModal" class="fixed inset-0 bg-black/35 backdrop-blur-[4px] z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'expenseModal')">
         <div class="w-full max-w-md ios27-sheet p-5 pb-9 space-y-4 animate-sheet-up" onclick="event.stopPropagation()">
             <div class="w-10 h-1.5 rounded-full mx-auto mb-1" style="background: var(--divider-color);"></div>
 
@@ -535,7 +614,7 @@
                 <div class="relative">
                     <input type="number" id="expenseAmountInput" placeholder="0" inputmode="decimal"
                         class="w-full py-3.5 px-4 rounded-2xl ios27-input text-3xl font-bold placeholder-[#8E8E93]">
-                    <span id="modalCurrencySymbol" class="absolute right-4 top-1/2 -translate-y-1/2 text-tertiary-ios font-bold text-xl">₽</span>
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-tertiary-ios font-bold text-xl">₽</span>
                 </div>
 
                 <div class="grid grid-cols-3 gap-2">
@@ -555,7 +634,7 @@
     </div>
 
     <!-- Income Modal -->
-    <div id="incomeModal" class="fixed inset-0 bg-black/35 backdrop-blur-[3px] z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'incomeModal')">
+    <div id="incomeModal" class="fixed inset-0 bg-black/35 backdrop-blur-[4px] z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'incomeModal')">
         <div class="w-full max-w-md ios27-sheet p-5 pb-9 space-y-4 animate-sheet-up" onclick="event.stopPropagation()">
             <div class="w-10 h-1.5 rounded-full mx-auto mb-1" style="background: var(--divider-color);"></div>
 
@@ -578,7 +657,7 @@
                 <div class="relative">
                     <input type="number" id="incomeAmountInput" placeholder="0" inputmode="decimal"
                         class="w-full py-3.5 px-4 rounded-2xl ios27-input text-3xl font-bold placeholder-[#8E8E93]">
-                    <span class="currLabel absolute right-4 top-1/2 -translate-y-1/2 text-tertiary-ios font-bold text-xl">₽</span>
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-tertiary-ios font-bold text-xl">₽</span>
                 </div>
 
                 <div class="grid grid-cols-3 gap-2">
@@ -598,7 +677,7 @@
     </div>
 
     <!-- Settings Modal -->
-    <div id="settingsModal" class="fixed inset-0 bg-black/35 backdrop-blur-[3px] z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'settingsModal')">
+    <div id="settingsModal" class="fixed inset-0 bg-black/35 backdrop-blur-[4px] z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'settingsModal')">
         <div class="w-full max-w-md ios27-sheet p-5 pb-9 space-y-4 animate-sheet-up max-h-[88vh] overflow-y-auto" onclick="event.stopPropagation()">
             <div class="w-10 h-1.5 rounded-full mx-auto mb-1" style="background: var(--divider-color);"></div>
 
@@ -610,49 +689,32 @@
             </div>
 
             <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-secondary-ios ml-1">Оформление iOS 27</label>
-                <div class="ios27-segmented grid grid-cols-3 text-xs font-semibold text-secondary-ios" id="themeSegmented">
-                    <button onclick="setTheme('light')" data-theme="light" class="ios27-segment-btn py-2 flex items-center justify-center space-x-1.5">
+                <label class="text-xs font-semibold text-secondary-ios ml-1">Тема</label>
+                <div class="ios27-segmented grid grid-cols-2 text-xs font-semibold text-secondary-ios" id="themeSegmented">
+                    <div id="themeSlidingPill" class="theme-sliding-pill"></div>
+                    <button onclick="setTheme('light')" data-theme="light" class="ios27-segment-btn py-2.5 flex items-center justify-center space-x-1.5">
                         <i class="fa-solid fa-sun text-[#FF9500]"></i>
                         <span>Светлая</span>
                     </button>
-                    <button onclick="setTheme('dark')" data-theme="dark" class="ios27-segment-btn py-2 flex items-center justify-center space-x-1.5">
+                    <button onclick="setTheme('dark')" data-theme="dark" class="ios27-segment-btn py-2.5 flex items-center justify-center space-x-1.5">
                         <i class="fa-solid fa-moon text-[#5E5CE6]"></i>
                         <span>Тёмная</span>
                     </button>
-                    <button onclick="setTheme('auto')" data-theme="auto" class="ios27-segment-btn py-2 flex items-center justify-center space-x-1.5 active">
-                        <i class="fa-solid fa-circle-half-stroke text-[#007AFF]"></i>
-                        <span>Авто</span>
-                    </button>
                 </div>
             </div>
 
-            <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-secondary-ios ml-1">Валюта</label>
-                <div class="ios27-segmented grid grid-cols-4 text-xs font-semibold text-secondary-ios" id="currencySegmented">
-                    <button onclick="setCurrency('₽')" data-curr="₽" class="ios27-segment-btn py-2 active">₽ RUB</button>
-                    <button onclick="setCurrency('$')" data-curr="$" class="ios27-segment-btn py-2">$ USD</button>
-                    <button onclick="setCurrency('€')" data-curr="€" class="ios27-segment-btn py-2">€ EUR</button>
-                    <button onclick="setCurrency('AED')" data-curr="AED" class="ios27-segment-btn py-2">AED</button>
-                </div>
-            </div>
-
-            <div id="pwaGuideCard" class="rounded-2xl p-3.5 border space-y-1.5 relative" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
-                <div class="flex justify-between items-start">
-                    <div class="flex items-center space-x-2">
-                        <i class="fa-solid fa-arrow-up-from-bracket text-[#007AFF] text-sm"></i>
-                        <span class="text-xs font-bold text-primary-ios">Ярлык на экран «Домой» iPhone</span>
+            <div class="space-y-2 pt-1">
+                <label class="text-xs font-semibold text-secondary-ios ml-1">Оформление</label>
+                <button onclick="openBackgroundModal()" class="w-full py-3.5 px-4 rounded-2xl text-xs font-semibold text-primary-ios border flex items-center justify-between active:scale-[0.98] transition-transform" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
+                    <div class="flex items-center space-x-2.5">
+                        <i class="fa-solid fa-palette text-[#007AFF]"></i>
+                        <span>Фон сайта</span>
                     </div>
-                    <button onclick="hidePwaGuide()" class="text-tertiary-ios text-xs px-1">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-                <p class="text-[11px] text-secondary-ios leading-relaxed">
-                    Откройте сайт в <b>Safari</b>, нажмите кнопку <b>«Поделиться»</b> внизу экрана и выберите <b>«На экран „Домой“»</b>, чтобы запускать Бюджет как нативное приложение.
-                </p>
+                    <i class="fa-solid fa-chevron-right text-tertiary-ios text-xs"></i>
+                </button>
             </div>
 
-            <div class="grid grid-cols-2 gap-2.5 pt-1">
+            <div class="grid grid-cols-2 gap-2.5 pt-2">
                 <button onclick="exportBudgetJSON()" class="py-3 rounded-2xl text-xs font-semibold text-[#007AFF] border flex items-center justify-center space-x-1.5 active:scale-95 transition-transform" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
                     <i class="fa-solid fa-file-export"></i>
                     <span>Экспорт JSON</span>
@@ -665,9 +727,86 @@
         </div>
     </div>
 
-    <!-- Custom Category Modal -->
-    <div id="customCategoryModal" class="fixed inset-0 bg-black/35 backdrop-blur-[3px] z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'customCategoryModal')">
+    <!-- Background Selection Modal -->
+    <div id="backgroundModal" class="fixed inset-0 bg-black/35 backdrop-blur-[4px] z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'backgroundModal')">
         <div class="w-full max-w-md ios27-sheet p-5 pb-9 space-y-4 animate-sheet-up" onclick="event.stopPropagation()">
+            <div class="w-10 h-1.5 rounded-full mx-auto mb-1" style="background: var(--divider-color);"></div>
+
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold text-primary-ios">Выбор фона сайта</h3>
+                <button onclick="closeModal('backgroundModal')" class="w-8 h-8 rounded-full flex items-center justify-center text-tertiary-ios" style="background: var(--surface-pill);">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 gap-2.5">
+                <button onclick="selectWallpaper(1)" class="p-3.5 rounded-2xl border flex items-center justify-between transition-all" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#1E50BE] to-[#552DAF]"></div>
+                        <span class="text-sm font-bold text-primary-ios">iOS 27 Liquid Dark</span>
+                    </div>
+                    <i id="checkWallpaper1" class="fa-solid fa-check text-[#007AFF] hidden"></i>
+                </button>
+                <button onclick="selectWallpaper(2)" class="p-3.5 rounded-2xl border flex items-center justify-between transition-all" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#059669] to-[#0D9488]"></div>
+                        <span class="text-sm font-bold text-primary-ios">Мятный изумруд</span>
+                    </div>
+                    <i id="checkWallpaper2" class="fa-solid fa-check text-[#007AFF] hidden"></i>
+                </button>
+                <button onclick="selectWallpaper(3)" class="p-3.5 rounded-2xl border flex items-center justify-between transition-all" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#B45309] to-[#92400E]"></div>
+                        <span class="text-sm font-bold text-primary-ios">Закатное золото</span>
+                    </div>
+                    <i id="checkWallpaper3" class="fa-solid fa-check text-[#007AFF] hidden"></i>
+                </button>
+                <button onclick="selectWallpaper(4)" class="p-3.5 rounded-2xl border flex items-center justify-between transition-all" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#6D28D9] to-[#7E22CE]"></div>
+                        <span class="text-sm font-bold text-primary-ios">Неоновый индиго</span>
+                    </div>
+                    <i id="checkWallpaper4" class="fa-solid fa-check text-[#007AFF] hidden"></i>
+                </button>
+                <button onclick="selectWallpaper(5)" class="p-3.5 rounded-2xl border flex items-center justify-between transition-all" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#334155] to-[#1E293B]"></div>
+                        <span class="text-sm font-bold text-primary-ios">Минимал Слейт</span>
+                    </div>
+                    <i id="checkWallpaper5" class="fa-solid fa-check text-[#007AFF] hidden"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Start Date Modal -->
+    <div id="budgetStartDateModal" class="fixed inset-0 bg-black/35 backdrop-blur-[4px] z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'budgetStartDateModal')">
+        <div class="w-full max-w-md ios27-sheet p-5 pb-9 space-y-4 animate-sheet-up" onclick="event.stopPropagation()">
+            <div class="w-10 h-1.5 rounded-full mx-auto mb-1" style="background: var(--divider-color);"></div>
+
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold text-primary-ios">Дата начала бюджета</h3>
+                <button onclick="closeModal('budgetStartDateModal')" class="w-8 h-8 rounded-full flex items-center justify-center text-tertiary-ios" style="background: var(--surface-pill);">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3">
+                <p class="text-xs text-secondary-ios">Выберите день месяца, с которого начинается отсчет вашего бюджета:</p>
+                <div class="grid grid-cols-6 gap-2 max-h-48 overflow-y-auto p-2" style="background: var(--glass-tile-bg); border-radius: 20px;">
+                    <script>
+                        for(let i=1; i<=31; i++) {
+                            document.write(`<button type="button" onclick="setBudgetStartDay(${i})" class="py-2.5 rounded-xl text-xs font-bold text-primary-ios hover:bg-[#007AFF] hover:text-white transition">${i}</button>`);
+                        }
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Category Modal -->
+    <div id="customCategoryModal" class="fixed inset-0 bg-black/35 backdrop-blur-[4px] z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'customCategoryModal')">
+        <div class="w-full max-w-md ios27-sheet p-5 pb-9 space-y-4 animate-sheet-up max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
             <div class="w-10 h-1.5 rounded-full mx-auto mb-1" style="background: var(--divider-color);"></div>
 
             <div class="flex justify-between items-center">
@@ -678,30 +817,61 @@
             </div>
 
             <div class="space-y-3">
-                <input type="text" id="customCatName" placeholder="Название (например: Спорт, Авто, Питомцы)" 
+                <input type="text" id="customCatName" placeholder="Название (например: Спорт, Питомцы)" 
                     class="w-full py-3 px-4 rounded-2xl ios27-input text-base placeholder-[#8E8E93]">
 
                 <div>
                     <label class="text-xs font-semibold text-secondary-ios mb-1.5 block ml-1">Иконка</label>
-                    <div class="grid grid-cols-6 gap-2">
-                        <button type="button" onclick="selectCatIcon('fa-plane', '#007AFF', this)" class="icon-opt p-3 rounded-2xl border-2 border-[#007AFF] text-[#007AFF] flex items-center justify-center" style="background: var(--glass-tile-bg);"><i class="fa-solid fa-plane"></i></button>
-                        <button type="button" onclick="selectCatIcon('fa-dumbbell', '#FF9500', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-[#FF9500] flex items-center justify-center" style="background: var(--glass-tile-bg);"><i class="fa-solid fa-dumbbell"></i></button>
-                        <button type="button" onclick="selectCatIcon('fa-car', '#5856D6', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-[#5856D6] flex items-center justify-center" style="background: var(--glass-tile-bg);"><i class="fa-solid fa-car"></i></button>
-                        <button type="button" onclick="selectCatIcon('fa-paw', '#AF52DE', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-[#AF52DE] flex items-center justify-center" style="background: var(--glass-tile-bg);"><i class="fa-solid fa-paw"></i></button>
-                        <button type="button" onclick="selectCatIcon('fa-gift', '#FF2D55', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-[#FF2D55] flex items-center justify-center" style="background: var(--glass-tile-bg);"><i class="fa-solid fa-gift"></i></button>
-                        <button type="button" onclick="selectCatIcon('fa-graduation-cap', '#34C759', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-[#34C759] flex items-center justify-center" style="background: var(--glass-tile-bg);"><i class="fa-solid fa-graduation-cap"></i></button>
+                    <div class="grid grid-cols-6 gap-2 max-h-48 overflow-y-auto p-1.5" style="background: var(--glass-tile-bg); border-radius: 20px;">
+                        <button type="button" onclick="selectCatIcon('fa-plane', this)" class="icon-opt p-3 rounded-2xl border-2 border-[#007AFF] text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-plane"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-dumbbell', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-dumbbell"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-car', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-car"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-paw', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-paw"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-gift', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-gift"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-graduation-cap', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-graduation-cap"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-shirt', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-shirt"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-book', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-book"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-gamepad', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-gamepad"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-mug-hot', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-mug-hot"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-house', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-house"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-heart-pulse', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-heart-pulse"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-laptop', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-laptop"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-film', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-film"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-music', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-music"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-camera', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-camera"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-hammer', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-hammer"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-bus', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-bus"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-baby-carriage', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-baby-carriage"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-spa', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-spa"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-basket-shopping', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-basket-shopping"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-bicycle', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-bicycle"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-piggy-bank', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-piggy-bank"></i></button>
+                        <button type="button" onclick="selectCatIcon('fa-wine-glass', this)" class="icon-opt p-3 rounded-2xl border-2 border-transparent text-primary-ios flex items-center justify-center text-base"><i class="fa-solid fa-wine-glass"></i></button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold text-secondary-ios mb-1.5 block ml-1">Цвет иконки</label>
+                    <div id="customColorPalette" class="flex space-x-3 p-2 justify-between" style="background: var(--glass-tile-bg); border-radius: 20px;">
+                        <button type="button" data-color="#007AFF" onclick="selectCatColor('#007AFF', this)" class="color-opt w-9 h-9 rounded-full bg-[#007AFF] ring-2 ring-offset-2 ring-[#007AFF] transition-transform active:scale-90"></button>
+                        <button type="button" data-color="#34C759" onclick="selectCatColor('#34C759', this)" class="color-opt w-9 h-9 rounded-full bg-[#34C759] ring-2 ring-offset-2 ring-transparent transition-transform active:scale-90"></button>
+                        <button type="button" data-color="#FF9500" onclick="selectCatColor('#FF9500', this)" class="color-opt w-9 h-9 rounded-full bg-[#FF9500] ring-2 ring-offset-2 ring-transparent transition-transform active:scale-90"></button>
+                        <button type="button" data-color="#FF3B30" onclick="selectCatColor('#FF3B30', this)" class="color-opt w-9 h-9 rounded-full bg-[#FF3B30] ring-2 ring-offset-2 ring-transparent transition-transform active:scale-90"></button>
+                        <button type="button" data-color="#AF52DE" onclick="selectCatColor('#AF52DE', this)" class="color-opt w-9 h-9 rounded-full bg-[#AF52DE] ring-2 ring-offset-2 ring-transparent transition-transform active:scale-90"></button>
+                        <button type="button" data-color="#5856D6" onclick="selectCatColor('#5856D6', this)" class="color-opt w-9 h-9 rounded-full bg-[#5856D6] ring-2 ring-offset-2 ring-transparent transition-transform active:scale-90"></button>
+                        <button type="button" data-color="#00C7BE" onclick="selectCatColor('#00C7BE', this)" class="color-opt w-9 h-9 rounded-full bg-[#00C7BE] ring-2 ring-offset-2 ring-transparent transition-transform active:scale-90"></button>
                     </div>
                 </div>
             </div>
 
-            <button onclick="saveCustomCategory()" class="w-full py-3.5 rounded-2xl bg-[#007AFF] text-white font-semibold text-base shadow-sm">
+            <button type="button" onclick="saveCustomCategory()" class="w-full py-3.5 rounded-2xl bg-[#007AFF] active:bg-[#0062CC] text-white font-semibold text-base shadow-sm transition-transform active:scale-[0.98]">
                 Создать статью
             </button>
         </div>
     </div>
 
     <!-- Reset Modal -->
-    <div id="resetModal" class="fixed inset-0 bg-black/35 backdrop-blur-[3px] z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'resetModal')">
+    <div id="resetModal" class="fixed inset-0 bg-black/35 backdrop-blur-[4px] z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'resetModal')">
         <div class="w-full max-w-md p-4 pb-9 space-y-2.5 animate-sheet-up" onclick="event.stopPropagation()">
             <div class="ios27-sheet rounded-3xl overflow-hidden divider-ios text-center">
                 <div class="p-3.5">
@@ -732,14 +902,14 @@
                     </button>
                     <h3 class="text-xl font-bold text-primary-ios">Кредиты и карты</h3>
                 </div>
-                <button onclick="openAddCreditModal()" class="bg-[#007AFF] text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center space-x-1 active:scale-95 transition-transform">
+                <button onclick="openAddCreditModal()" class="bg-[#007AFF] text-white px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center space-x-1 active:scale-95 transition-transform">
                     <i class="fa-solid fa-plus text-[10px]"></i>
                     <span>Добавить</span>
                 </button>
             </div>
 
             <div class="ios27-glass p-4 space-y-3 bg-gradient-to-br from-[#5E5CE6]/15 via-transparent to-[#0A84FF]/10">
-                <div class="flex justify-between items-start">
+                <div class="flex justify-between items-start gap-2">
                     <div>
                         <p class="text-xs font-semibold text-secondary-ios">Суммарная задолженность</p>
                         <p id="creditsTotalDebt" class="text-2xl font-bold text-[#FF3B30] tracking-tight mt-0.5">0 ₽</p>
@@ -752,6 +922,10 @@
                 <div class="w-full h-2.5 rounded-full overflow-hidden" style="background: var(--surface-pill);">
                     <div id="creditsTotalProgressBar" class="h-full bg-[#FF3B30] rounded-full transition-all duration-500" style="width: 0%;"></div>
                 </div>
+                <div class="flex justify-between items-center text-[11px] pt-0.5 border-t" style="border-color: var(--divider-color);">
+                    <span class="text-secondary-ios font-medium">Ежемесячные платежи:</span>
+                    <span id="creditsTotalMonthly" class="font-bold text-primary-ios">0 ₽</span>
+                </div>
             </div>
 
             <div id="creditsCardsList" class="space-y-3.5"></div>
@@ -759,8 +933,8 @@
     </div>
 
     <!-- Add Credit Modal -->
-    <div id="addCreditModal" class="fixed inset-0 bg-black/35 backdrop-blur-[3px] z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'addCreditModal')">
-        <div class="w-full max-w-md ios27-sheet p-5 pb-9 space-y-4 animate-sheet-up max-h-[88vh] overflow-y-auto" onclick="event.stopPropagation()">
+    <div id="addCreditModal" class="fixed inset-0 bg-black/35 backdrop-blur-[4px] z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'addCreditModal')">
+        <div class="w-full max-w-md ios27-sheet p-5 pb-9 space-y-4 animate-sheet-up max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
             <div class="w-10 h-1.5 rounded-full mx-auto mb-1" style="background: var(--divider-color);"></div>
 
             <div class="flex justify-between items-center">
@@ -771,128 +945,148 @@
             </div>
 
             <div class="ios27-segmented grid grid-cols-2 text-xs font-semibold text-secondary-ios" id="creditTypeSegmented">
-                <button type="button" onclick="toggleCreditTypeInput('card')" id="btnTypeCard" class="ios27-segment-btn py-2 active flex items-center justify-center space-x-1">
+                <button type="button" onclick="toggleCreditTypeInput('card')" id="btnTypeCard" class="ios27-segment-btn py-2.5 active flex items-center justify-center space-x-1">
                     <i class="fa-solid fa-credit-card"></i>
                     <span>Кредитная карта</span>
                 </button>
-                <button type="button" onclick="toggleCreditTypeInput('loan')" id="btnTypeLoan" class="ios27-segment-btn py-2 flex items-center justify-center space-x-1">
+                <button type="button" onclick="toggleCreditTypeInput('loan')" id="btnTypeLoan" class="ios27-segment-btn py-2.5 flex items-center justify-center space-x-1">
                     <i class="fa-solid fa-landmark"></i>
                     <span>Кредит</span>
                 </button>
             </div>
 
             <div class="space-y-3">
-                <input type="text" id="creditNameInput" placeholder="Название (например: СберКарта, Автокредит)" 
-                    class="w-full py-3 px-4 rounded-2xl ios27-input text-sm placeholder-[#8E8E93]">
+                <div>
+                    <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Название банка / продукта</label>
+                    <input type="text" id="creditNameInput" placeholder="Например: СберКарта или Автокредит" 
+                        class="w-full py-2.5 px-3.5 rounded-2xl ios27-input text-sm placeholder-[#8E8E93]">
+                </div>
 
                 <div id="cardFieldsSection" class="space-y-3">
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Кредитный лимит</label>
+                            <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Кредитный лимит (₽)</label>
                             <input type="number" id="cardLimitInput" placeholder="100 000" inputmode="decimal"
                                 class="w-full py-2.5 px-3 rounded-2xl ios27-input text-sm font-semibold">
                         </div>
                         <div>
-                            <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Текущий долг</label>
+                            <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Текущий долг (₽)</label>
                             <input type="number" id="cardDebtInput" placeholder="0" inputmode="decimal"
                                 class="w-full py-2.5 px-3 rounded-2xl ios27-input text-sm font-semibold">
                         </div>
                     </div>
-
-                    <div>
-                        <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Длина грейс-периода (дней)</label>
-                        <div class="grid grid-cols-4 gap-1.5 mb-2">
-                            <button type="button" onclick="setGraceDaysPreset(55)" class="py-1.5 rounded-xl text-xs font-semibold text-primary-ios border" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">55 дн</button>
-                            <button type="button" onclick="setGraceDaysPreset(100)" class="py-1.5 rounded-xl text-xs font-semibold text-primary-ios border" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">100 дн</button>
-                            <button type="button" onclick="setGraceDaysPreset(120)" class="py-1.5 rounded-xl text-xs font-semibold text-primary-ios border" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">120 дн</button>
-                            <button type="button" onclick="setGraceDaysPreset(365)" class="py-1.5 rounded-xl text-xs font-semibold text-primary-ios border" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">365 дн</button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Мин. платёж (₽)</label>
+                            <input type="number" id="cardMinPaymentInput" placeholder="3 500" inputmode="decimal"
+                                class="w-full py-2.5 px-3 rounded-2xl ios27-input text-sm font-semibold">
                         </div>
-                        <input type="number" id="cardGraceDaysInput" placeholder="Число дней (например: 120)" 
-                            class="w-full py-2.5 px-3 rounded-2xl ios27-input text-sm font-semibold">
+                        <div>
+                            <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">День платежа (1-31)</label>
+                            <input type="number" id="cardPaymentDayInput" min="1" max="31" placeholder="15" inputmode="numeric"
+                                class="w-full py-2.5 px-3 rounded-2xl ios27-input text-sm font-semibold">
+                        </div>
                     </div>
-
                     <div>
-                        <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Дата начала текущего грейс-периода</label>
-                        <input type="date" id="cardGraceStartDateInput" 
+                        <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Льготный период до (число месяца, 1-31)</label>
+                        <input type="number" id="cardGraceDayInput" min="1" max="31" placeholder="Например: 25 (необязательно)" inputmode="numeric"
                             class="w-full py-2.5 px-3 rounded-2xl ios27-input text-sm font-semibold">
                     </div>
                 </div>
 
                 <div id="loanFieldsSection" class="space-y-3 hidden">
-                    <div>
-                        <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Остаток долга по кредиту</label>
-                        <input type="number" id="loanDebtInput" placeholder="250 000" inputmode="decimal"
-                            class="w-full py-2.5 px-3 rounded-2xl ios27-input text-sm font-semibold">
-                    </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Ежемесячный платеж</label>
-                            <input type="number" id="loanPaymentInput" placeholder="12 500" inputmode="decimal"
+                            <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Сумма кредита (₽)</label>
+                            <input type="number" id="loanTotalInput" placeholder="500 000" inputmode="decimal"
                                 class="w-full py-2.5 px-3 rounded-2xl ios27-input text-sm font-semibold">
                         </div>
                         <div>
-                            <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">День платежа (1-31)</label>
-                            <input type="number" id="loanDueDayInput" placeholder="15" min="1" max="31"
+                            <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Остаток долга (₽)</label>
+                            <input type="number" id="loanDebtInput" placeholder="250 000" inputmode="decimal"
                                 class="w-full py-2.5 px-3 rounded-2xl ios27-input text-sm font-semibold">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Платёж / мес</label>
+                            <input type="number" id="loanMonthlyInput" placeholder="15 000" inputmode="decimal"
+                                class="w-full py-2.5 px-2.5 rounded-2xl ios27-input text-sm font-semibold">
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Ставка %</label>
+                            <input type="number" step="0.1" id="loanRateInput" placeholder="14.5" inputmode="decimal"
+                                class="w-full py-2.5 px-2.5 rounded-2xl ios27-input text-sm font-semibold">
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">День (1-31)</label>
+                            <input type="number" id="loanPaymentDayInput" min="1" max="31" placeholder="10" inputmode="numeric"
+                                class="w-full py-2.5 px-2.5 rounded-2xl ios27-input text-sm font-semibold">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <button onclick="saveNewCreditProduct()" class="w-full py-3.5 rounded-2xl bg-[#007AFF] text-white font-semibold text-base shadow-sm">
-                Сохранить
+            <button type="button" onclick="saveNewCreditProduct()" class="w-full py-3.5 rounded-2xl bg-[#007AFF] active:bg-[#0062CC] text-white font-semibold text-base shadow-sm transition-transform active:scale-[0.98]">
+                Сохранить продукт
             </button>
         </div>
     </div>
 
-    <!-- Credit Action Modal -->
-    <div id="creditActionModal" class="fixed inset-0 bg-black/35 backdrop-blur-[3px] z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'creditActionModal')">
+    <!-- Credit Quick Operation Modal -->
+    <div id="creditOpModal" class="fixed inset-0 bg-black/40 backdrop-blur-[4px] z-[60] flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'creditOpModal')">
         <div class="w-full max-w-md ios27-sheet p-5 pb-9 space-y-4 animate-sheet-up" onclick="event.stopPropagation()">
             <div class="w-10 h-1.5 rounded-full mx-auto mb-1" style="background: var(--divider-color);"></div>
 
             <div class="flex justify-between items-center">
-                <div>
-                    <h3 id="creditActionTitle" class="text-lg font-bold text-primary-ios">Операция по карте</h3>
-                    <p id="creditActionSub" class="text-xs text-tertiary-ios">Внести или потратить</p>
+                <div class="flex items-center space-x-3">
+                    <div id="creditOpIcon" class="w-11 h-11 rounded-[16px] bg-[#34C759] flex items-center justify-center text-white text-base shadow-sm">
+                        <i class="fa-solid fa-arrow-down"></i>
+                    </div>
+                    <div>
+                        <h3 id="creditOpTitle" class="text-lg font-bold text-primary-ios">Внести платёж</h3>
+                        <p id="creditOpSubtitle" class="text-xs text-tertiary-ios">Кредитная карта</p>
+                    </div>
                 </div>
-                <button onclick="closeModal('creditActionModal')" class="w-8 h-8 rounded-full flex items-center justify-center text-tertiary-ios" style="background: var(--surface-pill);">
+                <button onclick="closeModal('creditOpModal')" class="w-8 h-8 rounded-full flex items-center justify-center text-tertiary-ios" style="background: var(--surface-pill);">
                     <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
 
             <div class="space-y-3">
                 <div class="relative">
-                    <input type="number" id="creditActionAmountInput" placeholder="0" inputmode="decimal"
+                    <input type="number" id="creditOpAmountInput" placeholder="0" inputmode="decimal"
                         class="w-full py-3.5 px-4 rounded-2xl ios27-input text-3xl font-bold placeholder-[#8E8E93]">
-                    <span class="currLabel absolute right-4 top-1/2 -translate-y-1/2 text-tertiary-ios font-bold text-xl">₽</span>
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-tertiary-ios font-bold text-xl">₽</span>
                 </div>
 
-                <div id="creditActionExpenseToggle" class="flex items-center justify-between p-3 rounded-2xl border" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
-                    <span class="text-xs font-semibold text-primary-ios">Учитывать как расход в общем бюджете</span>
-                    <input type="checkbox" id="creditLogExpenseCheck" checked class="w-4 h-4 accent-[#007AFF]">
-                </div>
+                <div id="creditOpPresets" class="grid grid-cols-3 gap-2"></div>
+
+                <label id="creditOpLogExpenseWrapper" class="flex items-center space-x-2.5 p-3 rounded-2xl border cursor-pointer" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
+                    <input type="checkbox" id="creditOpLogExpense" checked class="w-4 h-4 accent-[#007AFF] rounded">
+                    <span class="text-xs font-semibold text-primary-ios">Учесть в расходах основного бюджета</span>
+                </label>
             </div>
 
-            <button id="creditActionSubmitBtn" onclick="submitCreditAction()" class="w-full py-3.5 rounded-2xl text-white font-semibold text-base shadow-sm">
+            <button type="button" onclick="submitCreditOperation()" id="creditOpSubmitBtn" class="w-full py-3.5 rounded-2xl bg-[#34C759] text-white font-semibold text-base shadow-sm transition-transform active:scale-[0.98]">
                 Подтвердить
             </button>
         </div>
     </div>
 
-    <!-- Toast Notification -->
+    <!-- Toast -->
     <div id="iosToast" class="fixed top-12 left-1/2 -translate-x-1/2 z-50 ios27-glass px-4 py-2.5 rounded-full flex items-center space-x-2 opacity-0 pointer-events-none transition-all duration-300 -translate-y-4">
         <i class="fa-solid fa-circle-check text-[#34C759] text-sm"></i>
         <span id="iosToastText" class="text-xs font-semibold text-primary-ios">Сохранено</span>
     </div>
 
     <script>
-        // --- UPDATED SUPABASE CLIENT SETUP ---
         const SUPABASE_URL = 'https://araeagnsbsjlnraiwpxv.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_PvCN5tJ2UW2UTS_IxFuAVA_6tslftYH';
 
         let supabaseClient = null;
         let currentUser = null;
-        let authMode = 'login'; // 'login' or 'register'
+        let authMode = 'login';
 
         function initSupabase() {
             if (window.supabase) {
@@ -934,21 +1128,17 @@
                 const nickname = currentUser.email ? currentUser.email.split('@')[0] : 'Пользователь';
                 headerLabel.innerText = `@${nickname}`;
                 headerLabel.className = "text-[10px] font-semibold text-[#34C759] mt-1 cursor-pointer hover:underline";
-                
                 profileTitle.innerText = `@${nickname}`;
-                profileSubtitle.innerText = 'Аккаунт активен и синхронизируется с облаком';
+                profileSubtitle.innerText = 'Аккаунт синхронизирован с облаком';
                 avatarIcon.className = "w-14 h-14 rounded-[22px] bg-[#34C759] flex items-center justify-center text-white text-xl shadow-sm";
-                
                 authContainer.classList.add('hidden');
                 logoutContainer.classList.remove('hidden');
             } else {
                 headerLabel.innerText = "Локальный режим";
                 headerLabel.className = "text-[10px] font-medium text-tertiary-ios mt-1 cursor-pointer hover:underline";
-                
                 profileTitle.innerText = "Локальный режим";
-                profileSubtitle.innerText = 'Войдите или зарегистрируйтесь по нику и паролю';
+                profileSubtitle.innerText = 'Данные хранятся только на этом устройстве';
                 avatarIcon.className = "w-14 h-14 rounded-[22px] bg-[#007AFF] flex items-center justify-center text-white text-xl shadow-sm";
-                
                 authContainer.classList.remove('hidden');
                 logoutContainer.classList.add('hidden');
             }
@@ -963,40 +1153,24 @@
 
         async function handleAuthSubmit() {
             if (!supabaseClient) {
-                showToast('Ошибка инициализации базы данных');
+                showToast('Ошибка инициализации БД');
                 return;
             }
             const nicknameInput = document.getElementById('authNicknameInput').value.trim().toLowerCase();
             const password = document.getElementById('authPasswordInput').value.trim();
-
             if (!nicknameInput || !password) {
                 showToast('Заполните никнейм и пароль');
                 return;
             }
-
-            // Convert nickname to internal email format for Supabase Auth
             const email = `${nicknameInput}@budget.app`;
-
             if (authMode === 'register') {
                 const { data, error } = await supabaseClient.auth.signUp({ email, password });
-                if (error) {
-                    showToast('Ошибка: ' + error.message);
-                } else {
-                    currentUser = data.user;
-                    updateProfileUI(true);
-                    showToast('Регистрация успешна!');
-                    saveCloudData();
-                }
+                if (error) showToast('Ошибка: ' + error.message);
+                else { currentUser = data.user; updateProfileUI(true); showToast('Регистрация успешна!'); saveCloudData(); }
             } else {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                if (error) {
-                    showToast('Ошибка входа: неверный ник или пароль');
-                } else {
-                    currentUser = data.user;
-                    updateProfileUI(true);
-                    showToast('Вход выполнен!');
-                    loadCloudData();
-                }
+                if (error) showToast('Ошибка входа: неверные данные');
+                else { currentUser = data.user; updateProfileUI(true); showToast('Вход выполнен!'); loadCloudData(); }
             }
         }
 
@@ -1016,47 +1190,37 @@
                     state_data: state,
                     updated_at: new Date()
                 }, { onConflict: 'user_id' });
-            } catch (e) {
-                console.error('Cloud save error:', e);
-            }
+            } catch (e) { console.error('Cloud save error:', e); }
         }
 
         async function loadCloudData() {
             if (!supabaseClient || !currentUser) return;
             try {
-                const { data, error } = await supabaseClient
-                    .from('user_budgets')
-                    .select('state_data')
-                    .eq('user_id', currentUser.id)
-                    .single();
-                
+                const { data } = await supabaseClient.from('user_budgets').select('state_data').eq('user_id', currentUser.id).single();
                 if (data && data.state_data) {
                     state = { ...state, ...data.state_data };
                     renderAll();
                     showToast('Данные загружены из облака');
                 }
-            } catch (e) {
-                console.error('Cloud load error:', e);
-            }
+            } catch (e) { console.error('Cloud load error:', e); }
         }
 
-        // --- 9 POPULAR EXPENSE CATEGORIES ---
         const DEFAULT_CATEGORIES = [
-            { id: 'groceries', name: 'Продукты', icon: 'fa-cart-shopping', color: '#34C759' },
-            { id: 'cafes', name: 'Кафе и еда', icon: 'fa-utensils', color: '#FF9500' },
-            { id: 'transport', name: 'Транспорт и такси', icon: 'fa-taxi', color: '#007AFF' },
-            { id: 'housing', name: 'Дом и ЖКХ', icon: 'fa-house', color: '#5856D6' },
-            { id: 'health', name: 'Здоровье и аптека', icon: 'fa-heart-pulse', color: '#FF2D55' },
-            { id: 'shopping', name: 'Одежда и шопинг', icon: 'fa-bag-shopping', color: '#AF52DE' },
-            { id: 'subs', name: 'Подписки и связь', icon: 'fa-wifi', color: '#30B0C7' },
-            { id: 'fun', name: 'Развлечения и отдых', icon: 'fa-film', color: '#FF3B30' },
-            { id: 'other', name: 'Другое', icon: 'fa-ellipsis', color: '#8E8E93' }
+            { id: 'transfers', name: 'Переводы', icon: 'fa-right-left', color: '#00C7BE', isDefault: true },
+            { id: 'groceries', name: 'Продукты', icon: 'fa-cart-shopping', color: '#34C759', isDefault: true },
+            { id: 'cafes', name: 'Кафе и еда', icon: 'fa-utensils', color: '#FF9500', isDefault: true },
+            { id: 'transport', name: 'Транспорт', icon: 'fa-taxi', color: '#007AFF', isDefault: true },
+            { id: 'housing', name: 'Дом и ЖКХ', icon: 'fa-house', color: '#5856D6', isDefault: true },
+            { id: 'health', name: 'Здоровье', icon: 'fa-heart-pulse', color: '#FF2D55', isDefault: true },
+            { id: 'shopping', name: 'Шопинг', icon: 'fa-bag-shopping', color: '#AF52DE', isDefault: true },
+            { id: 'subs', name: 'Подписки', icon: 'fa-wifi', color: '#30B0C7', isDefault: true },
+            { id: 'fun', name: 'Развлечения', icon: 'fa-film', color: '#FF3B30', isDefault: true }
         ];
 
         let state = {
-            theme: 'auto',
-            currency: '₽',
-            hidePwaGuide: false,
+            theme: 'dark',
+            wallpaper: 1,
+            budgetStartDay: 1,
             categories: [...DEFAULT_CATEGORIES],
             transactions: [],
             credits: []
@@ -1067,43 +1231,62 @@
         let selectedCustomIcon = 'fa-plane';
         let selectedCustomColor = '#007AFF';
         let historyFilterCat = 'all';
-
-        let activeCreditActionId = null;
-        let activeCreditActionType = 'pay';
-        let activeCreditProductType = 'card';
+        let categoryEditMode = false;
+        let analyticsChartObj = null;
+        let modalTimers = {};
 
         window.onload = function() {
             loadState();
             applyTheme(state.theme);
-            
+            applyWallpaper(state.wallpaper);
             initSupabase();
 
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-                if (state.theme === 'auto') applyTheme('auto');
+            window.addEventListener('resize', () => {
+                updateDockIndicator();
+                updateThemeIndicator();
             });
-
-            if (state.hidePwaGuide) {
-                const guide = document.getElementById('pwaGuideCard');
-                if (guide) guide.classList.add('hidden');
-            }
-
             renderAll();
+            updateDockIndicator();
+            updateThemeIndicator();
         };
 
+        function updateDockIndicator() {
+            const tabs = ['home', 'analytics', 'history', 'profile'];
+            const tabIdx = tabs.indexOf(activeTab);
+            const pill = document.getElementById('dockSlidingPill');
+            if (pill && pill.parentElement) {
+                const dockWidth = pill.parentElement.clientWidth - 8;
+                const itemWidth = (dockWidth - 12) / 4;
+                const offset = 4 + tabIdx * (itemWidth + 4);
+                pill.style.width = `${itemWidth}px`;
+                pill.style.left = `${offset}px`;
+            }
+        }
+
+        function updateThemeIndicator() {
+            const seg = document.getElementById('themeSegmented');
+            const pill = document.getElementById('themeSlidingPill');
+            if (!seg || !pill) return;
+            const totalW = seg.clientWidth;
+            if (totalW <= 0) return;
+            const itemW = (totalW - 6) / 2;
+            const idx = state.theme === 'dark' ? 1 : 0;
+            pill.style.width = `${itemW}px`;
+            pill.style.left = `${3 + idx * itemW}px`;
+        }
+
         function saveState() {
-            localStorage.setItem('ios27_liquid_budget_v1', JSON.stringify(state));
+            localStorage.setItem('ios27_liquid_budget_v5', JSON.stringify(state));
             saveCloudData();
         }
 
         function loadState() {
-            const saved = localStorage.getItem('ios27_liquid_budget_v1');
+            const saved = localStorage.getItem('ios27_liquid_budget_v5');
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
                     state = { ...state, ...parsed };
-                } catch (e) {
-                    console.error('Ошибка загрузки данных:', e);
-                }
+                } catch (e) { console.error('Load error:', e); }
             }
         }
 
@@ -1113,48 +1296,82 @@
             applyTheme(mode);
         }
 
-        function cycleTheme() {
-            const order = ['auto', 'light', 'dark'];
-            const next = order[(order.indexOf(state.theme) + 1) % order.length];
+        function toggleTheme() {
+            const next = state.theme === 'dark' ? 'light' : 'dark';
             setTheme(next);
-            const names = { auto: 'Авто (системная)', light: 'Светлая тема', dark: 'Тёмная тема' };
-            showToast(names[next]);
+            showToast(next === 'dark' ? 'Тёмная тема' : 'Светлая тема');
         }
 
         function applyTheme(mode) {
-            const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const useDark = mode === 'dark' || (mode === 'auto' && isSystemDark);
-
-            document.documentElement.classList.toggle('dark', useDark);
-
+            document.documentElement.classList.toggle('dark', mode === 'dark');
             const metaTheme = document.getElementById('metaThemeColor');
-            if (metaTheme) {
-                metaTheme.setAttribute('content', useDark ? '#0B0E17' : '#E8F1FC');
-            }
+            if (metaTheme) metaTheme.setAttribute('content', mode === 'dark' ? '#0B0E17' : '#E8F1FC');
 
             const iconEl = document.getElementById('themeIcon');
             const labelEl = document.getElementById('themeLabel');
             if (mode === 'light') {
                 iconEl.className = 'fa-solid fa-sun text-sm text-[#FF9500]';
                 labelEl.innerText = 'Светлая';
-            } else if (mode === 'dark') {
+            } else {
                 iconEl.className = 'fa-solid fa-moon text-sm text-[#5E5CE6]';
                 labelEl.innerText = 'Тёмная';
-            } else {
-                iconEl.className = 'fa-solid fa-circle-half-stroke text-sm text-[#007AFF]';
-                labelEl.innerText = 'Авто';
             }
 
             document.querySelectorAll('#themeSegmented button').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.theme === mode);
             });
+            updateThemeIndicator();
+        }
+
+        function selectWallpaper(id) {
+            state.wallpaper = id;
+            saveState();
+            applyWallpaper(id);
+            closeModal('backgroundModal');
+            showToast('Фон изменен');
+        }
+
+        function applyWallpaper(id) {
+            document.body.setAttribute('data-wallpaper', id);
+            for (let i = 1; i <= 5; i++) {
+                const check = document.getElementById(`checkWallpaper${i}`);
+                if (check) check.classList.toggle('hidden', i !== id);
+            }
+        }
+
+        function openBackgroundModal() {
+            openModal('backgroundModal');
         }
 
         function switchTab(tabName) {
+            if (categoryEditMode && tabName !== 'home') {
+                categoryEditMode = false;
+                const btn = document.getElementById('categoryEditToggleBtn');
+                if (btn) {
+                    btn.innerText = "Изм.";
+                    btn.style.color = "";
+                }
+            }
+
             activeTab = tabName;
-            ['home', 'analytics', 'history', 'profile'].forEach(t => {
+            updateDockIndicator();
+
+            const tabs = ['home', 'analytics', 'history', 'profile'];
+            tabs.forEach((t) => {
                 const tabEl = document.getElementById(`tab-${t}`);
-                if (tabEl) tabEl.classList.toggle('hidden', t !== tabName);
+                if (tabEl) {
+                    tabEl.classList.toggle('hidden', t !== tabName);
+                    if (t === tabName) {
+                        tabEl.querySelectorAll('[class*="animate-stagger-"]').forEach(el => {
+                            el.style.animation = 'none';
+                            void el.offsetHeight;
+                            el.style.animation = '';
+                        });
+                        if (t === 'home') {
+                            renderCategoriesGrid(true);
+                        }
+                    }
+                }
                 
                 const btn = document.getElementById(`nav-${t}`);
                 if (btn) {
@@ -1172,583 +1389,40 @@
             if (tabName === 'history') renderHistoryTab();
         }
 
-        function setCurrency(curr) {
-            state.currency = curr;
-            saveState();
-            renderAll();
-            showToast(`Валюта: ${curr}`);
-        }
-
-        function updateCurrencyUI() {
-            document.querySelectorAll('#currencySegmented button').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.curr === state.currency);
-            });
-            document.querySelectorAll('.currLabel').forEach(el => el.innerText = state.currency);
-            document.getElementById('modalCurrencySymbol').innerText = state.currency;
-        }
-
-        function renderAll() {
-            updateCurrencyUI();
+        function renderAll(animateCats = false) {
             renderBalanceCard();
-            renderCategoriesGrid();
+            renderCategoriesGrid(animateCats);
             renderCreditsWidget();
             renderRecentTransactions();
             if (activeTab === 'analytics') renderAnalyticsTab();
             if (activeTab === 'history') renderHistoryTab();
         }
 
-        function renderCreditsWidget() {
-            const count = state.credits.length;
-            const totalDebt = state.credits.reduce((sum, c) => sum + (c.debt || 0), 0);
-
-            document.getElementById('creditsWidgetSub').innerText = `${count} ${count === 1 ? 'продукт' : (count > 1 && count < 5 ? 'продукта' : 'продуктов')}`;
-            document.getElementById('creditsWidgetBadge').innerText = `${formatNum(totalDebt)} ${state.currency}`;
-
-            const banner = document.getElementById('creditsWidgetGraceBanner');
-            const textEl = document.getElementById('creditsWidgetGraceText');
-
-            const cardsWithGrace = state.credits.filter(c => c.type === 'card' && c.debt > 0 && c.graceDays && c.graceStartDate);
-            if (cardsWithGrace.length > 0) {
-                let minDays = Infinity;
-                let nearestCard = null;
-
-                cardsWithGrace.forEach(card => {
-                    const days = calcGraceDaysLeft(card.graceStartDate, card.graceDays);
-                    if (days < minDays) {
-                        minDays = days;
-                        nearestCard = card;
-                    }
-                });
-
-                if (nearestCard) {
-                    banner.classList.remove('hidden');
-                    if (minDays <= 0) {
-                        textEl.innerHTML = `<span class="text-[#FF3B30] font-bold">${nearestCard.name}: льготный период ИСТЕК!</span>`;
-                    } else if (minDays <= 14) {
-                        textEl.innerHTML = `<span class="text-[#FF9500] font-bold">${nearestCard.name}: осталось ${minDays} дн. без %</span>`;
-                    } else {
-                        textEl.innerHTML = `<span class="text-[#34C759] font-semibold">${nearestCard.name}: осталось ${minDays} дн. грейс</span>`;
-                    }
-                } else {
-                    banner.classList.add('hidden');
-                }
-            } else {
-                banner.classList.add('hidden');
-            }
-        }
-
-        function renderCreditsView() {
-            const totalDebt = state.credits.reduce((sum, c) => sum + (c.debt || 0), 0);
-            const totalLimit = state.credits.filter(c => c.type === 'card').reduce((sum, c) => sum + (c.limit || 0), 0);
-            const totalAvailable = Math.max(0, totalLimit - state.credits.filter(c => c.type === 'card').reduce((sum, c) => sum + (c.debt || 0), 0));
-
-            document.getElementById('creditsTotalDebt').innerText = `${formatNum(totalDebt)} ${state.currency}`;
-            document.getElementById('creditsTotalLimit').innerText = `${formatNum(totalAvailable)} ${state.currency}`;
-
-            const pct = totalLimit > 0 ? Math.min(100, Math.round((totalDebt / totalLimit) * 100)) : 0;
-            document.getElementById('creditsTotalProgressBar').style.width = `${pct}%`;
-
-            const listEl = document.getElementById('creditsCardsList');
-            listEl.innerHTML = '';
-
-            if (state.credits.length === 0) {
-                listEl.innerHTML = `
-                    <div class="ios27-glass p-6 text-center space-y-2">
-                        <i class="fa-solid fa-credit-card text-2xl text-tertiary-ios"></i>
-                        <p class="text-xs text-tertiary-ios">У вас пока нет добавленных кредитных карт или кредитов.</p>
-                        <button onclick="openAddCreditModal()" class="px-4 py-2 bg-[#007AFF] text-white text-xs font-bold rounded-full inline-block mt-2">Добавить карту</button>
-                    </div>
-                `;
-                return;
-            }
-
-            state.credits.forEach(c => {
-                if (c.type === 'card') {
-                    listEl.appendChild(createCreditCardElement(c));
-                } else {
-                    listEl.appendChild(createLoanElement(c));
-                }
-            });
-        }
-
-        function calcGraceDaysLeft(startDateStr, totalDays) {
-            if (!startDateStr || !totalDays) return 0;
-            const start = new Date(startDateStr);
-            const endDate = new Date(start.getTime() + totalDays * 86400000);
-            const today = new Date();
-            const diffTime = endDate - today;
-            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        }
-
-        function createCreditCardElement(card) {
-            const debt = card.debt || 0;
-            const limit = card.limit || 0;
-            const available = Math.max(0, limit - debt);
-            const usedPct = limit > 0 ? Math.min(100, Math.round((debt / limit) * 100)) : 0;
-            const daysLeft = calcGraceDaysLeft(card.graceStartDate, card.graceDays);
-            
-            let statusBg = 'bg-[#34C759]/15 text-[#34C759]';
-            let statusText = `${daysLeft} дн. без %`;
-            if (daysLeft <= 0) {
-                statusBg = 'bg-[#FF3B30]/18 text-[#FF3B30]';
-                statusText = 'Грейс истек!';
-            } else if (daysLeft <= 15) {
-                statusBg = 'bg-[#FF9500]/18 text-[#FF9500]';
-                statusText = `${daysLeft} дн. (скоро!)`;
-            }
-
-            const endDateFormatted = card.graceStartDate && card.graceDays 
-                ? new Date(new Date(card.graceStartDate).getTime() + card.graceDays * 86400000).toLocaleDateString('ru-RU')
-                : 'Не указана';
-
-            const div = document.createElement('div');
-            div.className = 'ios27-glass p-4 space-y-3 relative overflow-hidden';
-            div.innerHTML = `
-                <div class="flex justify-between items-start">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-[14px] bg-gradient-to-br from-[#007AFF] to-[#5856D6] flex items-center justify-center text-white text-sm shadow-xs">
-                            <i class="fa-solid fa-credit-card"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-base font-bold text-primary-ios leading-tight">${card.name}</h4>
-                            <p class="text-[11px] text-tertiary-ios mt-0.5">Лимит: ${formatNum(limit)} ${state.currency}</p>
-                        </div>
-                    </div>
-                    <span class="text-xs font-bold px-2.5 py-1 rounded-full ${statusBg}">${statusText}</span>
-                </div>
-
-                <div class="space-y-1">
-                    <div class="flex justify-between text-xs font-semibold">
-                        <span class="text-secondary-ios">Долг: <b class="text-[#FF3B30]">${formatNum(debt)} ${state.currency}</b></span>
-                        <span class="text-secondary-ios">Доступно: <b class="text-[#34C759]">${formatNum(available)} ${state.currency}</b></span>
-                    </div>
-                    <div class="w-full h-2 rounded-full overflow-hidden" style="background: var(--surface-pill);">
-                        <div class="h-full bg-[#007AFF] rounded-full transition-all duration-500" style="width: ${usedPct}%;"></div>
-                    </div>
-                </div>
-
-                <div class="flex justify-between items-center text-[11px] text-tertiary-ios pt-0.5 border-t border-dashed" style="border-color: var(--divider-color);">
-                    <span>Грейс: ${card.graceDays || 0} дней (до ${endDateFormatted})</span>
-                    <button onclick="editGracePeriod('${card.id}')" class="text-[#007AFF] font-semibold hover:underline">Изменить грейс</button>
-                </div>
-
-                <div class="grid grid-cols-3 gap-2 pt-1">
-                    <button onclick="openCreditAction('${card.id}', 'pay')" class="py-2 rounded-xl bg-[#34C759] text-white text-xs font-semibold shadow-xs active:scale-95 transition-transform">
-                        Внести платеж
-                    </button>
-                    <button onclick="openCreditAction('${card.id}', 'spend')" class="py-2 rounded-xl text-xs font-semibold text-primary-ios border active:scale-95 transition-transform" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
-                        Потратить
-                    </button>
-                    <button onclick="deleteCreditProduct('${card.id}')" class="py-2 rounded-xl bg-[#FF3B30]/12 text-[#FF3B30] text-xs font-semibold active:scale-95 transition-transform">
-                        Удалить
-                    </button>
-                </div>
-            `;
-            return div;
-        }
-
-        function createLoanElement(loan) {
-            const debt = loan.debt || 0;
-            const payment = loan.monthlyPayment || 0;
-
-            const div = document.createElement('div');
-            div.className = 'ios27-glass p-4 space-y-3 relative overflow-hidden';
-            div.innerHTML = `
-                <div class="flex justify-between items-start">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-[14px] bg-gradient-to-br from-[#FF9500] to-[#FF3B30] flex items-center justify-center text-white text-sm shadow-xs">
-                            <i class="fa-solid fa-landmark"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-base font-bold text-primary-ios leading-tight">${loan.name}</h4>
-                            <p class="text-[11px] text-tertiary-ios mt-0.5">Ежемесячный платеж: ${formatNum(payment)} ${state.currency}</p>
-                        </div>
-                    </div>
-                    <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-[#FF9500]/15 text-[#FF9500]">Платеж ${loan.dueDay || '—'}-го числа</span>
-                </div>
-
-                <div class="flex justify-between items-center text-xs font-semibold pt-1">
-                    <span class="text-secondary-ios">Остаток долга:</span>
-                    <span class="text-[#FF3B30] font-bold text-base">${formatNum(debt)} ${state.currency}</span>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2 pt-1">
-                    <button onclick="openCreditAction('${loan.id}', 'pay')" class="py-2 rounded-xl bg-[#34C759] text-white text-xs font-semibold shadow-xs active:scale-95 transition-transform">
-                        Внести платеж
-                    </button>
-                    <button onclick="deleteCreditProduct('${loan.id}')" class="py-2 rounded-xl bg-[#FF3B30]/12 text-[#FF3B30] text-xs font-semibold active:scale-95 transition-transform">
-                        Удалить
-                    </button>
-                </div>
-            `;
-            return div;
-        }
-
-        function openAddCreditModal() {
-            document.getElementById('creditNameInput').value = '';
-            document.getElementById('cardLimitInput').value = '';
-            document.getElementById('cardDebtInput').value = '';
-            document.getElementById('cardGraceDaysInput').value = '120';
-            document.getElementById('cardGraceStartDateInput').value = new Date().toISOString().slice(0, 10);
-
-            document.getElementById('loanDebtInput').value = '';
-            document.getElementById('loanPaymentInput').value = '';
-            document.getElementById('loanDueDayInput').value = '15';
-
-            toggleCreditTypeInput('card');
-            openModal('addCreditModal');
-        }
-
-        function toggleCreditTypeInput(type) {
-            activeCreditProductType = type;
-            document.getElementById('btnTypeCard').classList.toggle('active', type === 'card');
-            document.getElementById('btnTypeLoan').classList.toggle('active', type === 'loan');
-
-            document.getElementById('cardFieldsSection').classList.toggle('hidden', type !== 'card');
-            document.getElementById('loanFieldsSection').classList.toggle('hidden', type !== 'loan');
-        }
-
-        function setGraceDaysPreset(days) {
-            document.getElementById('cardGraceDaysInput').value = days;
-        }
-
-        function saveNewCreditProduct() {
-            const name = document.getElementById('creditNameInput').value.trim();
-            if (!name) {
-                showToast('Укажите название карты или кредита');
-                return;
-            }
-
-            if (activeCreditProductType === 'card') {
-                const limit = parseFloat(document.getElementById('cardLimitInput').value) || 0;
-                const debt = parseFloat(document.getElementById('cardDebtInput').value) || 0;
-                const graceDays = parseInt(document.getElementById('cardGraceDaysInput').value) || 55;
-                const graceStartDate = document.getElementById('cardGraceStartDateInput').value || new Date().toISOString().slice(0, 10);
-
-                state.credits.push({
-                    id: 'cr_' + Date.now(),
-                    type: 'card',
-                    name: name,
-                    limit: limit,
-                    debt: debt,
-                    graceDays: graceDays,
-                    graceStartDate: graceStartDate
-                });
-            } else {
-                const debt = parseFloat(document.getElementById('loanDebtInput').value) || 0;
-                const payment = parseFloat(document.getElementById('loanPaymentInput').value) || 0;
-                const dueDay = parseInt(document.getElementById('loanDueDayInput').value) || 15;
-
-                state.credits.push({
-                    id: 'cr_' + Date.now(),
-                    type: 'loan',
-                    name: name,
-                    debt: debt,
-                    monthlyPayment: payment,
-                    dueDay: dueDay
-                });
-            }
-
-            saveState();
-            renderAll();
-            renderCreditsView();
-            closeModal('addCreditModal');
-            showToast('Кредитный продукт добавлен');
-        }
-
-        function openCreditAction(id, actionType) {
-            activeCreditActionId = id;
-            activeCreditActionType = actionType;
-
-            const product = state.credits.find(c => c.id === id);
-            if (!product) return;
-
-            document.getElementById('creditActionTitle').innerText = actionType === 'pay' ? `Погашение: ${product.name}` : `Расход по карте: ${product.name}`;
-            document.getElementById('creditActionSub').innerText = actionType === 'pay' ? 'Уменьшение задолженности' : 'Увеличение долга по карте';
-            
-            const submitBtn = document.getElementById('creditActionSubmitBtn');
-            submitBtn.innerText = actionType === 'pay' ? 'Внести платеж' : 'Записать расход';
-            submitBtn.className = `w-full py-3.5 rounded-2xl text-white font-semibold text-base shadow-sm ${actionType === 'pay' ? 'bg-[#34C759]' : 'bg-[#007AFF]'}`;
-
-            document.getElementById('creditActionAmountInput').value = '';
-            openModal('creditActionModal');
-            setTimeout(() => document.getElementById('creditActionAmountInput').focus(), 140);
-        }
-
-        function submitCreditAction() {
-            const amount = parseFloat(document.getElementById('creditActionAmountInput').value);
-            if (!amount || amount <= 0) {
-                showToast('Введите сумму');
-                return;
-            }
-
-            const product = state.credits.find(c => c.id === activeCreditActionId);
-            if (!product) return;
-
-            const logExpense = document.getElementById('creditLogExpenseCheck').checked;
-
-            if (activeCreditActionType === 'pay') {
-                product.debt = Math.max(0, (product.debt || 0) - amount);
-
-                if (product.debt === 0 && product.type === 'card') {
-                    product.graceStartDate = new Date().toISOString().slice(0, 10);
-                }
-
-                if (logExpense) {
-                    state.transactions.push({
-                        id: 'tx_' + Date.now(),
-                        type: 'expense',
-                        categoryId: 'other',
-                        amount: amount,
-                        note: `Погашение (${product.name})`,
-                        date: formatNowDate()
-                    });
-                }
-                showToast(`Оплачено ${formatNum(amount)} ${state.currency}`);
-            } else {
-                product.debt = (product.debt || 0) + amount;
-
-                if (logExpense) {
-                    state.transactions.push({
-                        id: 'tx_' + Date.now(),
-                        type: 'expense',
-                        categoryId: 'other',
-                        amount: amount,
-                        note: `Карта (${product.name})`,
-                        date: formatNowDate()
-                    });
-                }
-                showToast(`Долг увеличен на ${formatNum(amount)} ${state.currency}`);
-            }
-
-            saveState();
-            renderAll();
-            renderCreditsView();
-            closeModal('creditActionModal');
-        }
-
-        function editGracePeriod(id) {
-            const card = state.credits.find(c => c.id === id);
-            if (!card) return;
-
-            const newDaysStr = prompt('Введите длительность льготного периода в днях:', card.graceDays || 120);
-            if (newDaysStr === null) return;
-            const newDays = parseInt(newDaysStr);
-
-            const newDate = prompt('Дата начала грейс-периода (ГГГГ-ММ-ДД):', card.graceStartDate || new Date().toISOString().slice(0, 10));
-            if (newDate === null) return;
-
-            card.graceDays = newDays || card.graceDays;
-            card.graceStartDate = newDate || card.graceStartDate;
-
-            saveState();
-            renderAll();
-            renderCreditsView();
-            showToast('Грейс-период обновлен');
-        }
-
-        function deleteCreditProduct(id) {
-            state.credits = state.credits.filter(c => c.id !== id);
-            saveState();
-            renderAll();
-            renderCreditsView();
-            showToast('Продукт удален');
-        }
-
-        function openModal(id) {
-            if (id === 'creditsModal') renderCreditsView();
-            const modal = document.getElementById(id);
-            if (!modal) return;
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-            }, 10);
-        }
-
-        function closeModal(id) {
-            const modal = document.getElementById(id);
-            if (!modal) return;
-            modal.classList.add('opacity-0');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 200);
-        }
-
-        function backdropClose(e, id) {
-            if (e.target.id === id) {
-                closeModal(id);
-            }
-        }
-
-        function openIncomeModal() {
-            document.getElementById('incomeAmountInput').value = '';
-            document.getElementById('incomeNoteInput').value = '';
-            openModal('incomeModal');
-            setTimeout(() => document.getElementById('incomeAmountInput').focus(), 140);
-        }
-
-        function setIncomePreset(val) {
-            document.getElementById('incomeAmountInput').value = val;
-        }
-
-        function saveIncome() {
-            const amount = parseFloat(document.getElementById('incomeAmountInput').value);
-            if (!amount || amount <= 0) {
-                showToast('Введите корректную сумму дохода');
-                return;
-            }
-            const note = document.getElementById('incomeNoteInput').value.trim() || 'Пополнение';
-
-            state.transactions.unshift({
-                id: 'tx_' + Date.now(),
-                type: 'income',
-                amount: amount,
-                note: note,
-                date: formatNowDate()
-            });
-
-            saveState();
-            renderAll();
-            closeModal('incomeModal');
-            showToast(`Зачислено ${formatNum(amount)} ${state.currency}`);
-        }
-
-        function openExpenseModal(catId) {
-            selectedCategoryForExpense = catId;
-            const cat = state.categories.find(c => c.id === catId);
-            if (!cat) return;
-
-            document.getElementById('modalCatTitle').innerText = cat.name;
-            const iconContainer = document.getElementById('modalCatIcon');
-            iconContainer.className = `w-12 h-12 rounded-[18px] flex items-center justify-center text-white text-lg shadow-sm`;
-            iconContainer.style.background = cat.color;
-            iconContainer.innerHTML = `<i class="fa-solid ${cat.icon}"></i>`;
-
-            document.getElementById('expenseAmountInput').value = '';
-            document.getElementById('expenseNoteInput').value = '';
-
-            openModal('expenseModal');
-            setTimeout(() => document.getElementById('expenseAmountInput').focus(), 140);
-        }
-
-        function addAmountShortcut(val) {
-            const input = document.getElementById('expenseAmountInput');
-            const current = parseFloat(input.value) || 0;
-            input.value = current + val;
-        }
-
-        function saveExpense() {
-            const amount = parseFloat(document.getElementById('expenseAmountInput').value);
-            if (!amount || amount <= 0) {
-                showToast('Введите сумму расхода');
-                return;
-            }
-            const note = document.getElementById('expenseNoteInput').value.trim();
-
-            state.transactions.unshift({
-                id: 'tx_' + Date.now(),
-                type: 'expense',
-                categoryId: selectedCategoryForExpense,
-                amount: amount,
-                note: note,
-                date: formatNowDate()
-            });
-
-            saveState();
-            renderAll();
-            closeModal('expenseModal');
-            showToast('Расход записан');
-        }
-
-        function openCustomCategoryModal() {
-            document.getElementById('customCatName').value = '';
-            selectedCustomIcon = 'fa-plane';
-            selectedCustomColor = '#007AFF';
-            updateCategoryIconSelectionUI();
-            openModal('customCategoryModal');
-        }
-
-        function selectCatIcon(icon, color, btnEl) {
-            selectedCustomIcon = icon;
-            selectedCustomColor = color;
-            document.querySelectorAll('.icon-opt').forEach(b => {
-                b.classList.remove('border-[#007AFF]');
-                b.classList.add('border-transparent');
-            });
-            btnEl.classList.add('border-[#007AFF]');
-            btnEl.classList.remove('border-transparent');
-        }
-
-        function updateCategoryIconSelectionUI() {
-            document.querySelectorAll('.icon-opt').forEach((b, idx) => {
-                if (idx === 0) {
-                    b.classList.add('border-[#007AFF]');
-                    b.classList.remove('border-transparent');
-                } else {
-                    b.classList.remove('border-[#007AFF]');
-                    b.classList.add('border-transparent');
-                }
-            });
-        }
-
-        function saveCustomCategory() {
-            const name = document.getElementById('customCatName').value.trim();
-            if (!name) {
-                showToast('Введите название статьи');
-                return;
-            }
-
-            const newId = 'cat_' + Date.now();
-            state.categories.push({
-                id: newId,
-                name: name,
-                icon: selectedCustomIcon,
-                color: selectedCustomColor
-            });
-
-            saveState();
-            renderAll();
-            closeModal('customCategoryModal');
-            showToast('Статья добавлена');
-        }
-
-        function hidePwaGuide() {
-            state.hidePwaGuide = true;
-            saveState();
-            const guide = document.getElementById('pwaGuideCard');
-            if (guide) guide.classList.add('hidden');
-        }
-
-        function exportBudgetJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", "budget_ios_export.json");
-            dlAnchorElem.click();
-            showToast('JSON экспортирован');
-        }
-
-        function resetTransactionsOnly() {
-            state.transactions = [];
-            saveState();
-            renderAll();
-            closeModal('resetModal');
-            showToast('История операций очищена');
-        }
-
-        function fullResetData() {
-            localStorage.removeItem('ios27_liquid_budget_v1');
-            location.reload();
-        }
-
         function renderBalanceCard() {
+            document.getElementById('budgetPeriodLabel').innerText = `С ${state.budgetStartDay}-го числа`;
+            
             const totalIncome = state.transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
             const totalExpense = state.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
             const balance = totalIncome - totalExpense;
 
-            document.getElementById('balanceAmount').innerText = `${formatNum(balance)} ${state.currency}`;
-            document.getElementById('totalIncomeText').innerText = `${formatNum(totalIncome)} ${state.currency}`;
-            document.getElementById('totalExpenseText').innerText = `${formatNum(totalExpense)} ${state.currency}`;
+            const balanceEl = document.getElementById('balanceAmount');
+            const formattedBalance = `${formatNum(balance)} ₽`;
+            balanceEl.innerText = formattedBalance;
+
+            const len = formattedBalance.length;
+            balanceEl.classList.remove('text-[36px]', 'text-[34px]', 'text-[28px]', 'text-[24px]', 'text-[21px]');
+            if (len <= 8) {
+                balanceEl.classList.add('text-[34px]');
+            } else if (len <= 11) {
+                balanceEl.classList.add('text-[28px]');
+            } else if (len <= 14) {
+                balanceEl.classList.add('text-[24px]');
+            } else {
+                balanceEl.classList.add('text-[21px]');
+            }
+
+            document.getElementById('totalIncomeText').innerText = `${formatNum(totalIncome)} ₽`;
+            document.getElementById('totalExpenseText').innerText = `${formatNum(totalExpense)} ₽`;
 
             const bar = document.getElementById('segmentedProgressBar');
             bar.innerHTML = '';
@@ -1775,7 +1449,7 @@
                     seg.className = 'h-full first:rounded-l-full last:rounded-r-full transition-all duration-500';
                     seg.style.width = `${pct}%`;
                     seg.style.backgroundColor = cat.color;
-                    seg.title = `${cat.name || 'Другое'}: ${formatNum(amount)} ${state.currency}`;
+                    seg.title = `${cat.name || 'Другое'}: ${formatNum(amount)} ₽`;
                     bar.appendChild(seg);
                 }
             });
@@ -1785,7 +1459,15 @@
             }
         }
 
-        function renderCategoriesGrid() {
+        function toggleCategoryEditMode() {
+            categoryEditMode = !categoryEditMode;
+            const btn = document.getElementById('categoryEditToggleBtn');
+            btn.innerText = categoryEditMode ? "Готово" : "Изм.";
+            btn.style.color = categoryEditMode ? "#007AFF" : "";
+            renderCategoriesGrid(false);
+        }
+
+        function renderCategoriesGrid(animateStagger = true) {
             const grid = document.getElementById('categoriesGrid');
             grid.innerHTML = '';
 
@@ -1794,40 +1476,139 @@
                 catSpent[t.categoryId] = (catSpent[t.categoryId] || 0) + t.amount;
             });
 
-            state.categories.forEach(cat => {
+            state.categories.forEach((cat, idx) => {
                 const spent = catSpent[cat.id] || 0;
-                const tile = document.createElement('button');
-                tile.className = 'ios27-tile p-3 flex flex-col items-start justify-between text-left h-24 relative overflow-hidden';
-                tile.onclick = () => openExpenseModal(cat.id);
+                const tile = document.createElement('div');
+                tile.dataset.catId = cat.id;
+                tile.setAttribute('role', 'button');
+                tile.setAttribute('tabindex', '0');
+
+                let classes = 'ios27-tile p-3 flex flex-col items-start justify-between text-left h-24 relative overflow-hidden select-none';
+                if (categoryEditMode) {
+                    classes += ' tile-jiggle';
+                } else if (animateStagger) {
+                    classes += ' category-tile-item';
+                    tile.style.animationDelay = `${0.08 + idx * 0.045}s`;
+                }
+                tile.className = classes;
+
+                const topRightAction = categoryEditMode
+                    ? `<button type="button" data-delete-btn="true" onclick="event.stopPropagation(); deleteCategory('${cat.id}')" class="w-6 h-6 rounded-full bg-[#FF3B30] text-white flex items-center justify-center text-[10px] shadow-sm active:scale-90 transition-transform z-20" title="Удалить">
+                            <i class="fa-solid fa-xmark"></i>
+                       </button>`
+                    : `<span class="text-[10px] font-semibold text-tertiary-ios px-1.5 py-0.5 rounded-full" style="background: var(--surface-pill);">+</span>`;
+
                 tile.innerHTML = `
                     <div class="flex justify-between items-center w-full">
-                        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm shadow-xs" style="background: ${cat.color};">
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm shadow-xs pointer-events-none" style="background: ${cat.color};">
                             <i class="fa-solid ${cat.icon}"></i>
                         </div>
-                        <span class="text-[10px] font-semibold text-tertiary-ios px-1.5 py-0.5 rounded-full" style="background: var(--surface-pill);">+</span>
+                        ${topRightAction}
                     </div>
-                    <div class="w-full min-w-0">
+                    <div class="w-full min-w-0 pointer-events-none">
                         <p class="text-[12px] font-bold text-primary-ios truncate leading-tight">${cat.name}</p>
-                        <p class="text-[11px] font-semibold text-secondary-ios truncate mt-0.5">${spent > 0 ? formatNum(spent) + ' ' + state.currency : '0 ' + state.currency}</p>
+                        <p class="text-[11px] font-semibold text-secondary-ios truncate mt-0.5">${spent > 0 ? formatNum(spent) + ' ₽' : '0 ₽'}</p>
                     </div>
                 `;
+
+                if (categoryEditMode) {
+                    tile.addEventListener('pointerdown', (e) => startCategoryDrag(e, tile, cat.id));
+                } else {
+                    tile.addEventListener('click', () => {
+                        openExpenseModal(cat.id);
+                    });
+                }
+
                 grid.appendChild(tile);
             });
+        }
+
+        function startCategoryDrag(e, tile, catId) {
+            if (e.target.closest('[data-delete-btn="true"]')) return;
+            if (e.button !== undefined && e.button !== 0) return;
+
+            e.preventDefault();
+            const startX = e.clientX;
+            const startY = e.clientY;
+            let hasMoved = false;
+
+            tile.setPointerCapture(e.pointerId);
+            tile.classList.add('tile-dragging');
+
+            const onPointerMove = (moveEvent) => {
+                const dx = moveEvent.clientX - startX;
+                const dy = moveEvent.clientY - startY;
+                if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+                    hasMoved = true;
+                }
+                tile.style.transform = `translate(${dx}px, ${dy}px) scale(1.07)`;
+
+                tile.style.pointerEvents = 'none';
+                const elemBelow = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
+                tile.style.pointerEvents = '';
+
+                const targetTile = elemBelow ? elemBelow.closest('[data-cat-id]') : null;
+                if (targetTile && targetTile !== tile) {
+                    const targetId = targetTile.dataset.catId;
+                    const fromIdx = state.categories.findIndex(c => c.id === catId);
+                    const toIdx = state.categories.findIndex(c => c.id === targetId);
+                    if (fromIdx !== -1 && toIdx !== -1 && fromIdx !== toIdx) {
+                        const grid = document.getElementById('categoriesGrid');
+                        const [movedItem] = state.categories.splice(fromIdx, 1);
+                        state.categories.splice(toIdx, 0, movedItem);
+
+                        if (fromIdx < toIdx) {
+                            grid.insertBefore(tile, targetTile.nextSibling);
+                        } else {
+                            grid.insertBefore(tile, targetTile);
+                        }
+                    }
+                }
+            };
+
+            const onPointerUp = (upEvent) => {
+                tile.removeEventListener('pointermove', onPointerMove);
+                tile.removeEventListener('pointerup', onPointerUp);
+                tile.removeEventListener('pointercancel', onPointerUp);
+
+                if (tile.hasPointerCapture(upEvent.pointerId)) {
+                    tile.releasePointerCapture(upEvent.pointerId);
+                }
+
+                tile.style.transform = '';
+                tile.classList.remove('tile-dragging');
+
+                if (hasMoved) {
+                    saveState();
+                }
+                renderCategoriesGrid(false);
+            };
+
+            tile.addEventListener('pointermove', onPointerMove);
+            tile.addEventListener('pointerup', onPointerUp);
+            tile.addEventListener('pointercancel', onPointerUp);
+        }
+
+        function deleteCategory(id) {
+            if (state.categories.length <= 1) {
+                showToast('Нельзя удалить последнюю статью');
+                return;
+            }
+            state.categories = state.categories.filter(c => c.id !== id);
+            saveState();
+            renderAll(false);
+            showToast('Статья удалена');
         }
 
         function renderRecentTransactions() {
             const list = document.getElementById('recentTransactionsList');
             list.innerHTML = '';
-
             const recent = state.transactions.slice(0, 5);
             if (recent.length === 0) {
-                list.innerHTML = `<p class="text-xs text-tertiary-ios text-center py-4">Нет операций. Нажмите на статью расходов выше.</p>`;
+                list.innerHTML = `<p class="text-xs text-tertiary-ios text-center py-4">Нет операций.</p>`;
                 return;
             }
-
-            recent.forEach(tx => {
-                list.appendChild(createTransactionRow(tx));
-            });
+            recent.forEach(tx => list.appendChild(createTransactionRow(tx)));
         }
 
         function createTransactionRow(tx) {
@@ -1850,7 +1631,7 @@
                 </div>
                 <div class="flex items-center space-x-2 shrink-0">
                     <span class="text-sm font-bold ${isIncome ? 'text-[#34C759]' : 'text-primary-ios'}">
-                        ${isIncome ? '+' : '-'}${formatNum(tx.amount)} ${state.currency}
+                        ${isIncome ? '+' : '-'}${formatNum(tx.amount)} ₽
                     </span>
                     <button onclick="deleteTransaction('${tx.id}')" class="text-tertiary-ios hover:text-[#FF3B30] p-1 text-xs">
                         <i class="fa-solid fa-xmark"></i>
@@ -1867,64 +1648,117 @@
             showToast('Операция удалена');
         }
 
+        function getFaUnicode(iconClass) {
+            const temp = document.createElement('i');
+            temp.className = `fa-solid ${iconClass}`;
+            temp.style.position = 'fixed';
+            temp.style.left = '-9999px';
+            document.body.appendChild(temp);
+            const content = window.getComputedStyle(temp, '::before').getPropertyValue('content');
+            document.body.removeChild(temp);
+            return content ? content.replace(/['"]/g, '') : '';
+        }
+
         function renderAnalyticsTab() {
             const totalExpense = state.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-            document.getElementById('analyticsTotalBadge').innerText = `${formatNum(totalExpense)} ${state.currency}`;
+            document.getElementById('analyticsTotalBadge').innerText = `${formatNum(totalExpense)} ₽`;
 
             const catSums = {};
             state.transactions.filter(t => t.type === 'expense').forEach(t => {
                 catSums[t.categoryId] = (catSums[t.categoryId] || 0) + t.amount;
             });
 
-            const container = document.getElementById('donutChartContainer');
-            container.innerHTML = '';
+            const sortedCatEntries = Object.entries(catSums).sort((a, b) => a[1] - b[1]);
 
-            if (totalExpense === 0) {
-                container.innerHTML = `
-                    <div class="text-center space-y-1">
-                        <i class="fa-solid fa-chart-pie text-3xl text-tertiary-ios"></i>
-                        <p class="text-xs text-tertiary-ios">Нет данных для аналитики</p>
-                    </div>
-                `;
-            } else {
-                let cumulativePercent = 0;
-                let svgContent = `<svg viewBox="0 0 100 100" class="w-48 h-48 transform -rotate-90">`;
-                
-                Object.entries(catSums).forEach(([catId, amount]) => {
-                    const cat = state.categories.find(c => c.id === catId) || { color: '#8E8E93' };
-                    const pct = (amount / totalExpense) * 100;
-                    const strokeDasharray = `${pct} ${100 - pct}`;
-                    const strokeDashoffset = -cumulativePercent;
+            const canvas = document.getElementById('analyticsDonutCanvas');
+            const ctx = canvas.getContext('2d');
 
-                    svgContent += `
-                        <circle cx="50" cy="50" r="40" fill="transparent" 
-                            stroke="${cat.color}" stroke-width="14" 
-                            stroke-dasharray="${strokeDasharray}" 
-                            stroke-dashoffset="${strokeDashoffset}" 
-                            class="transition-all duration-500"></circle>
-                    `;
-                    cumulativePercent += pct;
-                });
-
-                svgContent += `</svg>`;
-                container.innerHTML = svgContent + `
-                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
-                        <span class="text-[11px] font-semibold text-tertiary-ios">Всего расходов</span>
-                        <span class="text-lg font-bold text-primary-ios">${formatNum(totalExpense)} ${state.currency}</span>
-                    </div>
-                `;
+            if (analyticsChartObj) {
+                analyticsChartObj.destroy();
             }
+
+            if (totalExpense === 0 || sortedCatEntries.length === 0) {
+                if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+                document.getElementById('analyticsBreakdownList').innerHTML = `<p class="text-xs text-tertiary-ios text-center py-4">Расходов пока нет</p>`;
+                return;
+            }
+
+            const chartLabels = sortedCatEntries.map(([catId]) => {
+                const c = state.categories.find(item => item.id === catId);
+                return c ? c.name : 'Другое';
+            });
+            const chartData = sortedCatEntries.map(([, amt]) => amt);
+            const chartColors = sortedCatEntries.map(([catId]) => {
+                const c = state.categories.find(item => item.id === catId);
+                return c ? c.color : '#8E8E93';
+            });
+            const chartIcons = sortedCatEntries.map(([catId]) => {
+                const c = state.categories.find(item => item.id === catId);
+                return getFaUnicode(c ? c.icon : 'fa-receipt');
+            });
+
+            const donutIconsPlugin = {
+                id: 'donutIconsPlugin',
+                afterDatasetsDraw(chart) {
+                    const { ctx } = chart;
+                    const meta = chart.getDatasetMeta(0);
+                    if (!meta || !meta.data) return;
+
+                    ctx.save();
+                    meta.data.forEach((arc, index) => {
+                        const angleSpan = arc.endAngle - arc.startAngle;
+                        if (angleSpan < 0.24) return;
+
+                        const midAngle = (arc.startAngle + arc.endAngle) / 2;
+                        const midRadius = (arc.innerRadius + arc.outerRadius) / 2;
+                        const x = arc.x + Math.cos(midAngle) * midRadius;
+                        const y = arc.y + Math.sin(midAngle) * midRadius;
+
+                        const ringThickness = arc.outerRadius - arc.innerRadius;
+                        const fontSize = Math.max(11, Math.min(16, Math.round(ringThickness * 0.45)));
+
+                        ctx.font = `900 ${fontSize}px "Font Awesome 6 Free"`;
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(chartIcons[index] || '', x, y);
+                    });
+                    ctx.restore();
+                }
+            };
+
+            analyticsChartObj = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: chartColors,
+                        borderWidth: 0,
+                        hoverOffset: 6
+                    }]
+                },
+                plugins: [donutIconsPlugin],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 1200,
+                        easing: 'easeInOutQuart'
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    cutout: '66%'
+                }
+            });
 
             const breakdownList = document.getElementById('analyticsBreakdownList');
             breakdownList.innerHTML = '';
 
-            const sortedCats = Object.entries(catSums).sort((a, b) => b[1] - a[1]);
-            if (sortedCats.length === 0) {
-                breakdownList.innerHTML = `<p class="text-xs text-tertiary-ios text-center py-2">Расходов пока нет</p>`;
-                return;
-            }
-
-            sortedCats.forEach(([catId, amount]) => {
+            sortedCatEntries.reverse().forEach(([catId, amount]) => {
                 const cat = state.categories.find(c => c.id === catId) || { name: 'Другое', icon: 'fa-ellipsis', color: '#8E8E93' };
                 const pct = totalExpense > 0 ? Math.round((amount / totalExpense) * 100) : 0;
 
@@ -1936,7 +1770,7 @@
                             <div class="w-3 h-3 rounded-full" style="background: ${cat.color};"></div>
                             <span class="font-bold text-primary-ios">${cat.name}</span>
                         </div>
-                        <span class="font-bold text-secondary-ios">${formatNum(amount)} ${state.currency} (${pct}%)</span>
+                        <span class="font-bold text-secondary-ios">${formatNum(amount)} ₽ (${pct}%)</span>
                     </div>
                     <div class="w-full h-2 rounded-full overflow-hidden" style="background: var(--surface-pill);">
                         <div class="h-full rounded-full transition-all duration-500" style="width: ${pct}%; background: ${cat.color};"></div>
@@ -1948,7 +1782,6 @@
 
         function renderHistoryTab() {
             const query = (document.getElementById('historySearchInput').value || '').toLowerCase();
-            
             const pillsContainer = document.getElementById('historyFilterPills');
             pillsContainer.innerHTML = `
                 <button onclick="setHistoryFilter('all')" class="px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 ${historyFilterCat === 'all' ? 'bg-[#007AFF] text-white' : 'ios27-glass text-primary-ios'}">Все</button>
@@ -1964,26 +1797,21 @@
             });
 
             const filtered = state.transactions.filter(tx => {
-                const matchesCat = historyFilterCat === 'all' || tx.categoryId === historyFilterCat || (historyFilterCat === 'income' && tx.type === 'income');
+                const matchesCat = historyFilterCat === 'all' || tx.categoryId === historyFilterCat;
                 const cat = state.categories.find(c => c.id === tx.categoryId) || {};
                 const noteMatch = (tx.note || '').toLowerCase().includes(query);
                 const catMatch = (cat.name || '').toLowerCase().includes(query);
                 return matchesCat && (query === '' || noteMatch || catMatch);
             });
 
-            document.getElementById('historyCountLabel').innerText = `${filtered.length} ${getOperationsWord(filtered.length)}`;
-
+            document.getElementById('historyCountLabel').innerText = `${filtered.length} операций`;
             const list = document.getElementById('fullTransactionsList');
             list.innerHTML = '';
-
             if (filtered.length === 0) {
                 list.innerHTML = `<p class="text-xs text-tertiary-ios text-center py-6">Операции не найдены</p>`;
                 return;
             }
-
-            filtered.forEach(tx => {
-                list.appendChild(createTransactionRow(tx));
-            });
+            filtered.forEach(tx => list.appendChild(createTransactionRow(tx)));
         }
 
         function setHistoryFilter(catId) {
@@ -1991,31 +1819,642 @@
             renderHistoryTab();
         }
 
+        function getDaysUntilDayOfMonth(targetDay) {
+            if (!targetDay || targetDay < 1 || targetDay > 31) return null;
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            let year = today.getFullYear();
+            let month = today.getMonth();
+
+            let daysInMonth = new Date(year, month + 1, 0).getDate();
+            let candidate = new Date(year, month, Math.min(targetDay, daysInMonth));
+
+            if (candidate < today) {
+                month += 1;
+                if (month > 11) {
+                    month = 0;
+                    year += 1;
+                }
+                daysInMonth = new Date(year, month + 1, 0).getDate();
+                candidate = new Date(year, month, Math.min(targetDay, daysInMonth));
+            }
+
+            return Math.round((candidate - today) / (1000 * 60 * 60 * 24));
+        }
+
+        function formatDaysLeftLabel(days) {
+            if (days === 0) return 'сегодня';
+            if (days === 1) return 'завтра';
+            const mod10 = days % 10;
+            const mod100 = days % 100;
+            if (mod10 === 1 && mod100 !== 11) return `через ${days} день`;
+            if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return `через ${days} дня`;
+            return `через ${days} дн.`;
+        }
+
+        function pluralizeRu(n, one, few, many) {
+            const mod10 = n % 10;
+            const mod100 = n % 100;
+            if (mod10 === 1 && mod100 !== 11) return `${n} ${one}`;
+            if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return `${n} ${few}`;
+            return `${n} ${many}`;
+        }
+
+        function renderCreditsWidget() {
+            const cards = state.credits.filter(c => c.type === 'card');
+            const loans = state.credits.filter(c => c.type === 'loan');
+            const totalDebt = state.credits.reduce((sum, c) => sum + (Number(c.debt) || 0), 0);
+
+            const subEl = document.getElementById('creditsWidgetSub');
+            if (cards.length === 0 && loans.length === 0) {
+                subEl.innerText = '0 карт / кредитов';
+            } else {
+                const parts = [];
+                if (cards.length > 0) parts.push(pluralizeRu(cards.length, 'карта', 'карты', 'карт'));
+                if (loans.length > 0) parts.push(pluralizeRu(loans.length, 'кредит', 'кредита', 'кредитов'));
+                subEl.innerText = parts.join(' • ');
+            }
+
+            document.getElementById('creditsWidgetBadge').innerText = `${formatNum(totalDebt)} ₽`;
+
+            const banner = document.getElementById('creditsWidgetGraceBanner');
+            const bannerText = document.getElementById('creditsWidgetGraceText');
+            let nearestEvent = null;
+
+            state.credits.forEach(item => {
+                if (item.type === 'card' && item.graceDay && Number(item.debt) > 0) {
+                    const days = getDaysUntilDayOfMonth(Number(item.graceDay));
+                    if (days !== null && (!nearestEvent || days < nearestEvent.days)) {
+                        nearestEvent = {
+                            days,
+                            text: `Льготный период (${item.name}): ${formatDaysLeftLabel(days)}`,
+                            urgent: days <= 5
+                        };
+                    }
+                }
+                const payDay = item.paymentDay;
+                const payAmt = item.type === 'card' ? item.minPayment : item.monthlyPayment;
+                if (payDay && (Number(item.debt) > 0 || Number(payAmt) > 0)) {
+                    const days = getDaysUntilDayOfMonth(Number(payDay));
+                    if (days !== null && (!nearestEvent || days < nearestEvent.days)) {
+                        const amtStr = Number(payAmt) > 0 ? ` • ${formatNum(payAmt)} ₽` : '';
+                        nearestEvent = {
+                            days,
+                            text: `Платёж (${item.name}): ${formatDaysLeftLabel(days)}${amtStr}`,
+                            urgent: days <= 3
+                        };
+                    }
+                }
+            });
+
+            if (nearestEvent) {
+                banner.classList.remove('hidden');
+                bannerText.innerText = nearestEvent.text;
+                bannerText.className = nearestEvent.urgent
+                    ? 'truncate text-[#FF9500] font-bold'
+                    : 'truncate text-secondary-ios';
+            } else {
+                banner.classList.add('hidden');
+            }
+        }
+
+        function renderCreditsView() {
+            const totalDebt = state.credits.reduce((sum, c) => sum + (Number(c.debt) || 0), 0);
+            const totalLimit = state.credits
+                .filter(c => c.type === 'card')
+                .reduce((sum, c) => sum + (Number(c.limit) || 0), 0);
+            const totalAvailable = state.credits
+                .filter(c => c.type === 'card')
+                .reduce((sum, c) => sum + Math.max(0, (Number(c.limit) || 0) - (Number(c.debt) || 0)), 0);
+            const totalMonthly = state.credits.reduce((sum, c) => {
+                if (c.type === 'card') return sum + (Number(c.minPayment) || 0);
+                return sum + (Number(c.monthlyPayment) || 0);
+            }, 0);
+
+            document.getElementById('creditsTotalDebt').innerText = `${formatNum(totalDebt)} ₽`;
+            document.getElementById('creditsTotalLimit').innerText = `${formatNum(totalAvailable)} ₽`;
+            const monthlyEl = document.getElementById('creditsTotalMonthly');
+            if (monthlyEl) monthlyEl.innerText = `${formatNum(totalMonthly)} ₽`;
+
+            const progressBar = document.getElementById('creditsTotalProgressBar');
+            if (progressBar) {
+                const totalLoansOriginal = state.credits
+                    .filter(c => c.type === 'loan')
+                    .reduce((sum, c) => sum + Math.max(Number(c.totalAmount) || 0, Number(c.debt) || 0), 0);
+                const totalDenominator = totalLimit + totalLoansOriginal;
+                const utilPct = totalDenominator > 0 ? Math.min(100, Math.round((totalDebt / totalDenominator) * 100)) : 0;
+                progressBar.style.width = `${utilPct}%`;
+            }
+
+            const listEl = document.getElementById('creditsCardsList');
+            listEl.innerHTML = '';
+            if (state.credits.length === 0) {
+                listEl.innerHTML = `
+                    <div class="ios27-glass p-6 text-center space-y-1.5">
+                        <i class="fa-solid fa-credit-card text-2xl text-tertiary-ios"></i>
+                        <p class="text-xs font-semibold text-secondary-ios">Нет добавленных карт или кредитов</p>
+                        <p class="text-[11px] text-tertiary-ios">Нажмите «+ Добавить» сверху, чтобы вести точный учёт долгов и льготных периодов</p>
+                    </div>
+                `;
+                return;
+            }
+
+            state.credits.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'ios27-glass p-4 space-y-3';
+
+                if (c.type === 'card') {
+                    const limit = Number(c.limit) || 0;
+                    const debt = Number(c.debt) || 0;
+                    const available = Math.max(0, limit - debt);
+                    const usedPct = limit > 0 ? Math.min(100, Math.round((debt / limit) * 100)) : 0;
+                    const graceDays = c.graceDay ? getDaysUntilDayOfMonth(Number(c.graceDay)) : null;
+                    const payDays = c.paymentDay ? getDaysUntilDayOfMonth(Number(c.paymentDay)) : null;
+
+                    let badgesHtml = '';
+                    if (graceDays !== null && debt > 0) {
+                        const badgeColor = graceDays <= 5 ? 'text-[#FF9500] bg-[#FF9500]/15' : 'text-[#34C759] bg-[#34C759]/15';
+                        badgesHtml += `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeColor}">Льготный до ${c.graceDay}-го (${formatDaysLeftLabel(graceDays)})</span>`;
+                    }
+                    if (payDays !== null && (Number(c.minPayment) > 0 || debt > 0)) {
+                        const minStr = Number(c.minPayment) > 0 ? ` • мин. ${formatNum(c.minPayment)} ₽` : '';
+                        badgesHtml += `<span class="text-[10px] font-semibold px-2 py-0.5 rounded-full text-secondary-ios" style="background: var(--surface-pill);">Платёж ${c.paymentDay}-го (${formatDaysLeftLabel(payDays)})${minStr}</span>`;
+                    }
+
+                    div.innerHTML = `
+                        <div class="flex justify-between items-start gap-2">
+                            <div class="flex items-center space-x-2.5 min-w-0">
+                                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0A84FF] to-[#5E5CE6] text-white flex items-center justify-center text-xs shrink-0">
+                                    <i class="fa-solid fa-credit-card"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center space-x-1.5">
+                                        <h4 class="font-bold text-sm text-primary-ios truncate">${c.name}</h4>
+                                        <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-[#007AFF]/15 text-[#007AFF] shrink-0">Кредитка</span>
+                                    </div>
+                                    <p class="text-[11px] font-semibold text-[#34C759] mt-0.5">Доступно: ${formatNum(available)} ₽</p>
+                                </div>
+                            </div>
+                            <button onclick="deleteCreditProduct('${c.id}')" class="w-7 h-7 rounded-full flex items-center justify-center text-tertiary-ios hover:text-[#FF3B30] shrink-0" style="background: var(--surface-pill);" title="Удалить">
+                                <i class="fa-solid fa-trash-can text-[11px]"></i>
+                            </button>
+                        </div>
+
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[11px] font-semibold">
+                                <span class="text-[#FF3B30]">Долг: ${formatNum(debt)} ₽</span>
+                                <span class="text-tertiary-ios">Лимит: ${formatNum(limit)} ₽ (${usedPct}%)</span>
+                            </div>
+                            <div class="w-full h-2 rounded-full overflow-hidden" style="background: var(--surface-pill);">
+                                <div class="h-full rounded-full transition-all duration-500 ${usedPct > 80 ? 'bg-[#FF3B30]' : 'bg-[#007AFF]'}" style="width: ${usedPct}%;"></div>
+                            </div>
+                        </div>
+
+                        ${badgesHtml ? `<div class="flex flex-wrap gap-1.5">${badgesHtml}</div>` : ''}
+
+                        <div class="grid grid-cols-2 gap-2 pt-0.5">
+                            <button onclick="openCreditOpModal('${c.id}', 'repay')" class="py-2 rounded-xl text-xs font-bold bg-[#34C759]/15 text-[#34C759] active:scale-95 transition-transform flex items-center justify-center space-x-1">
+                                <i class="fa-solid fa-arrow-down text-[10px]"></i>
+                                <span>Пополнить</span>
+                            </button>
+                            <button onclick="openCreditOpModal('${c.id}', 'spend')" class="py-2 rounded-xl text-xs font-bold bg-[#FF3B30]/15 text-[#FF3B30] active:scale-95 transition-transform flex items-center justify-center space-x-1">
+                                <i class="fa-solid fa-cart-shopping text-[10px]"></i>
+                                <span>Трата с карты</span>
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    const totalAmount = Math.max(Number(c.totalAmount) || 0, Number(c.debt) || 0);
+                    const debt = Number(c.debt) || 0;
+                    const paidAmount = Math.max(0, totalAmount - debt);
+                    const paidPct = totalAmount > 0 ? Math.min(100, Math.round((paidAmount / totalAmount) * 100)) : 0;
+                    const payDays = c.paymentDay ? getDaysUntilDayOfMonth(Number(c.paymentDay)) : null;
+
+                    let loanBadges = '';
+                    if (Number(c.rate) > 0) {
+                        loanBadges += `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#5E5CE6]/15 text-[#5E5CE6]">${c.rate}% годовых</span>`;
+                    }
+                    if (Number(c.monthlyPayment) > 0) {
+                        loanBadges += `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full text-primary-ios" style="background: var(--surface-pill);">Платёж: ${formatNum(c.monthlyPayment)} ₽/мес</span>`;
+                    }
+                    if (payDays !== null && debt > 0) {
+                        const urgentClass = payDays <= 3 ? 'text-[#FF9500] bg-[#FF9500]/15' : 'text-secondary-ios';
+                        loanBadges += `<span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${urgentClass}" style="${payDays > 3 ? 'background: var(--surface-pill);' : ''}">Дата: ${c.paymentDay}-го (${formatDaysLeftLabel(payDays)})</span>`;
+                    }
+
+                    div.innerHTML = `
+                        <div class="flex justify-between items-start gap-2">
+                            <div class="flex items-center space-x-2.5 min-w-0">
+                                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#FF9500] to-[#FF3B30] text-white flex items-center justify-center text-xs shrink-0">
+                                    <i class="fa-solid fa-landmark"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center space-x-1.5">
+                                        <h4 class="font-bold text-sm text-primary-ios truncate">${c.name}</h4>
+                                        <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-[#FF9500]/15 text-[#FF9500] shrink-0">Кредит</span>
+                                    </div>
+                                    <p class="text-[11px] font-semibold text-[#FF3B30] mt-0.5">Остаток долга: ${formatNum(debt)} ₽</p>
+                                </div>
+                            </div>
+                            <button onclick="deleteCreditProduct('${c.id}')" class="w-7 h-7 rounded-full flex items-center justify-center text-tertiary-ios hover:text-[#FF3B30] shrink-0" style="background: var(--surface-pill);" title="Удалить">
+                                <i class="fa-solid fa-trash-can text-[11px]"></i>
+                            </button>
+                        </div>
+
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[11px] font-semibold">
+                                <span class="text-[#34C759]">Погашено: ${paidPct}% (${formatNum(paidAmount)} ₽)</span>
+                                <span class="text-tertiary-ios">Из ${formatNum(totalAmount)} ₽</span>
+                            </div>
+                            <div class="w-full h-2 rounded-full overflow-hidden" style="background: var(--surface-pill);">
+                                <div class="h-full bg-[#34C759] rounded-full transition-all duration-500" style="width: ${paidPct}%;"></div>
+                            </div>
+                        </div>
+
+                        ${loanBadges ? `<div class="flex flex-wrap gap-1.5">${loanBadges}</div>` : ''}
+
+                        <button onclick="openCreditOpModal('${c.id}', 'repay')" class="w-full py-2.5 rounded-xl text-xs font-bold bg-[#007AFF]/15 text-[#007AFF] active:scale-[0.98] transition-transform flex items-center justify-center space-x-1.5">
+                            <i class="fa-solid fa-check-circle text-[11px]"></i>
+                            <span>Внести платёж по кредиту</span>
+                        </button>
+                    `;
+                }
+
+                listEl.appendChild(div);
+            });
+        }
+
+        let activeCreditProductType = 'card';
+        let activeCreditOp = null;
+
+        function openAddCreditModal() {
+            document.getElementById('creditNameInput').value = '';
+            document.getElementById('cardLimitInput').value = '';
+            document.getElementById('cardDebtInput').value = '';
+            document.getElementById('cardMinPaymentInput').value = '';
+            document.getElementById('cardPaymentDayInput').value = '';
+            document.getElementById('cardGraceDayInput').value = '';
+            document.getElementById('loanTotalInput').value = '';
+            document.getElementById('loanDebtInput').value = '';
+            document.getElementById('loanMonthlyInput').value = '';
+            document.getElementById('loanRateInput').value = '';
+            document.getElementById('loanPaymentDayInput').value = '';
+            toggleCreditTypeInput('card');
+            openModal('addCreditModal');
+        }
+
+        function toggleCreditTypeInput(type) {
+            activeCreditProductType = type;
+            document.getElementById('btnTypeCard').classList.toggle('active', type === 'card');
+            document.getElementById('btnTypeLoan').classList.toggle('active', type === 'loan');
+            document.getElementById('cardFieldsSection').classList.toggle('hidden', type !== 'card');
+            document.getElementById('loanFieldsSection').classList.toggle('hidden', type !== 'loan');
+        }
+
+        function saveNewCreditProduct() {
+            const name = document.getElementById('creditNameInput').value.trim();
+            if (!name) {
+                showToast('Введите название продукта');
+                document.getElementById('creditNameInput').focus();
+                return;
+            }
+
+            if (activeCreditProductType === 'card') {
+                const limit = Math.max(0, parseFloat(document.getElementById('cardLimitInput').value) || 0);
+                const debt = Math.max(0, parseFloat(document.getElementById('cardDebtInput').value) || 0);
+                const minPayment = Math.max(0, parseFloat(document.getElementById('cardMinPaymentInput').value) || 0);
+                const paymentDayRaw = parseInt(document.getElementById('cardPaymentDayInput').value, 10);
+                const graceDayRaw = parseInt(document.getElementById('cardGraceDayInput').value, 10);
+
+                state.credits.push({
+                    id: 'cr_' + Date.now(),
+                    type: 'card',
+                    name,
+                    limit,
+                    debt,
+                    minPayment,
+                    paymentDay: paymentDayRaw >= 1 && paymentDayRaw <= 31 ? paymentDayRaw : null,
+                    graceDay: graceDayRaw >= 1 && graceDayRaw <= 31 ? graceDayRaw : null
+                });
+            } else {
+                const debt = Math.max(0, parseFloat(document.getElementById('loanDebtInput').value) || 0);
+                const totalRaw = Math.max(0, parseFloat(document.getElementById('loanTotalInput').value) || 0);
+                const totalAmount = totalRaw > 0 ? totalRaw : debt;
+                const monthlyPayment = Math.max(0, parseFloat(document.getElementById('loanMonthlyInput').value) || 0);
+                const rate = Math.max(0, parseFloat(document.getElementById('loanRateInput').value) || 0);
+                const paymentDayRaw = parseInt(document.getElementById('loanPaymentDayInput').value, 10);
+
+                state.credits.push({
+                    id: 'cr_' + Date.now(),
+                    type: 'loan',
+                    name,
+                    totalAmount,
+                    debt,
+                    monthlyPayment,
+                    rate,
+                    paymentDay: paymentDayRaw >= 1 && paymentDayRaw <= 31 ? paymentDayRaw : null
+                });
+            }
+
+            saveState();
+            renderAll();
+            renderCreditsView();
+            closeModal('addCreditModal');
+            showToast('Продукт добавлен');
+        }
+
+        function openCreditOpModal(creditId, opType) {
+            const item = state.credits.find(c => c.id === creditId);
+            if (!item) return;
+            activeCreditOp = { creditId, opType };
+
+            const iconEl = document.getElementById('creditOpIcon');
+            const titleEl = document.getElementById('creditOpTitle');
+            const subEl = document.getElementById('creditOpSubtitle');
+            const amountInput = document.getElementById('creditOpAmountInput');
+            const presetsEl = document.getElementById('creditOpPresets');
+            const logWrapper = document.getElementById('creditOpLogExpenseWrapper');
+            const logCheckbox = document.getElementById('creditOpLogExpense');
+            const submitBtn = document.getElementById('creditOpSubmitBtn');
+
+            subEl.innerText = `${item.name} • Долг: ${formatNum(item.debt || 0)} ₽`;
+            amountInput.value = '';
+            presetsEl.innerHTML = '';
+
+            if (opType === 'repay') {
+                iconEl.className = 'w-11 h-11 rounded-[16px] bg-[#34C759] flex items-center justify-center text-white text-base shadow-sm';
+                iconEl.innerHTML = '<i class="fa-solid fa-arrow-down"></i>';
+                titleEl.innerText = item.type === 'card' ? 'Пополнение карты' : 'Платёж по кредиту';
+                submitBtn.className = 'w-full py-3.5 rounded-2xl bg-[#34C759] text-white font-semibold text-base shadow-sm transition-transform active:scale-[0.98]';
+                submitBtn.innerText = 'Зачислить платёж';
+                logWrapper.classList.remove('hidden');
+                logCheckbox.checked = true;
+
+                const defaultPay = item.type === 'card' ? Number(item.minPayment) : Number(item.monthlyPayment);
+                const fullDebt = Number(item.debt) || 0;
+
+                if (defaultPay > 0) {
+                    presetsEl.innerHTML += `<button type="button" onclick="document.getElementById('creditOpAmountInput').value=${defaultPay}" class="py-2 rounded-2xl text-[11px] font-bold text-primary-ios border truncate px-1" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">Платёж ${formatNum(defaultPay)}</button>`;
+                }
+                if (fullDebt > 0) {
+                    presetsEl.innerHTML += `<button type="button" onclick="document.getElementById('creditOpAmountInput').value=${fullDebt}" class="py-2 rounded-2xl text-[11px] font-bold text-[#34C759] border truncate px-1" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">Весь долг</button>`;
+                }
+                presetsEl.innerHTML += `<button type="button" onclick="document.getElementById('creditOpAmountInput').value=(parseFloat(document.getElementById('creditOpAmountInput').value)||0)+5000" class="py-2 rounded-2xl text-[11px] font-bold text-primary-ios border" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">+5 000</button>`;
+            } else {
+                iconEl.className = 'w-11 h-11 rounded-[16px] bg-[#FF3B30] flex items-center justify-center text-white text-base shadow-sm';
+                iconEl.innerHTML = '<i class="fa-solid fa-cart-shopping"></i>';
+                titleEl.innerText = 'Трата с кредитной карты';
+                submitBtn.className = 'w-full py-3.5 rounded-2xl bg-[#FF3B30] text-white font-semibold text-base shadow-sm transition-transform active:scale-[0.98]';
+                submitBtn.innerText = 'Списать с карты';
+                logWrapper.classList.add('hidden');
+
+                [1000, 3000, 5000].forEach(val => {
+                    presetsEl.innerHTML += `<button type="button" onclick="document.getElementById('creditOpAmountInput').value=(parseFloat(document.getElementById('creditOpAmountInput').value)||0)+${val}" class="py-2 rounded-2xl text-xs font-bold text-primary-ios border" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">+${formatNum(val)}</button>`;
+                });
+            }
+
+            openModal('creditOpModal');
+        }
+
+        function submitCreditOperation() {
+            if (!activeCreditOp) return;
+            const amount = parseFloat(document.getElementById('creditOpAmountInput').value);
+            if (!amount || amount <= 0) {
+                showToast('Введите сумму');
+                return;
+            }
+
+            const item = state.credits.find(c => c.id === activeCreditOp.creditId);
+            if (!item) return;
+
+            if (activeCreditOp.opType === 'repay') {
+                item.debt = Math.max(0, (Number(item.debt) || 0) - amount);
+                const shouldLogExpense = document.getElementById('creditOpLogExpense').checked;
+                if (shouldLogExpense) {
+                    const fallbackCat = state.categories.find(c => c.id === 'transfers') || state.categories[0];
+                    state.transactions.unshift({
+                        id: 'tx_' + Date.now(),
+                        type: 'expense',
+                        categoryId: fallbackCat ? fallbackCat.id : 'transfers',
+                        amount: amount,
+                        note: `${item.type === 'card' ? 'Пополнение карты' : 'Платёж по кредиту'}: ${item.name}`,
+                        date: formatNowDate()
+                    });
+                }
+                showToast('Платёж внесён');
+            } else {
+                item.debt = (Number(item.debt) || 0) + amount;
+                showToast('Трата по карте учтена');
+            }
+
+            saveState();
+            renderAll();
+            renderCreditsView();
+            closeModal('creditOpModal');
+        }
+
+        function deleteCreditProduct(id) {
+            state.credits = state.credits.filter(c => c.id !== id);
+            saveState();
+            renderAll();
+            renderCreditsView();
+            showToast('Удалено');
+        }
+
+        function openModal(id) {
+            if (modalTimers[id]) {
+                clearTimeout(modalTimers[id]);
+                delete modalTimers[id];
+            }
+            if (id === 'creditsModal') renderCreditsView();
+            const modal = document.getElementById(id);
+            if (!modal) return;
+
+            modal.classList.add('opacity-0');
+            modal.classList.remove('hidden');
+            void modal.offsetHeight;
+
+            requestAnimationFrame(() => {
+                modal.classList.remove('opacity-0');
+                if (id === 'settingsModal') {
+                    updateThemeIndicator();
+                }
+            });
+        }
+
+        function closeModal(id) {
+            if (modalTimers[id]) {
+                clearTimeout(modalTimers[id]);
+                delete modalTimers[id];
+            }
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            modal.classList.add('opacity-0');
+            modalTimers[id] = setTimeout(() => {
+                modal.classList.add('hidden');
+                delete modalTimers[id];
+            }, 220);
+        }
+
+        function backdropClose(e, id) {
+            if (e.target.id === id) closeModal(id);
+        }
+
+        function openBudgetStartDateModal() { openModal('budgetStartDateModal'); }
+        function setBudgetStartDay(day) {
+            state.budgetStartDay = day;
+            saveState();
+            renderAll();
+            closeModal('budgetStartDateModal');
+            showToast(`Бюджет с ${day}-го числа`);
+        }
+
+        function openIncomeModal() {
+            document.getElementById('incomeAmountInput').value = '';
+            document.getElementById('incomeNoteInput').value = '';
+            openModal('incomeModal');
+        }
+        function setIncomePreset(val) { document.getElementById('incomeAmountInput').value = val; }
+        function saveIncome() {
+            const amount = parseFloat(document.getElementById('incomeAmountInput').value);
+            if (!amount || amount <= 0) return;
+            const note = document.getElementById('incomeNoteInput').value.trim() || 'Пополнение';
+            state.transactions.unshift({ id: 'tx_' + Date.now(), type: 'income', amount: amount, note: note, date: formatNowDate() });
+            saveState();
+            renderAll();
+            closeModal('incomeModal');
+            showToast('Доход зачислен');
+        }
+
+        function openExpenseModal(catId) {
+            selectedCategoryForExpense = catId;
+            const cat = state.categories.find(c => c.id === catId);
+            if (!cat) return;
+            document.getElementById('modalCatTitle').innerText = cat.name;
+            const iconContainer = document.getElementById('modalCatIcon');
+            iconContainer.style.background = cat.color;
+            iconContainer.innerHTML = `<i class="fa-solid ${cat.icon}"></i>`;
+            document.getElementById('expenseAmountInput').value = '';
+            document.getElementById('expenseNoteInput').value = '';
+            openModal('expenseModal');
+        }
+        function addAmountShortcut(val) {
+            const input = document.getElementById('expenseAmountInput');
+            input.value = (parseFloat(input.value) || 0) + val;
+        }
+        function saveExpense() {
+            const amount = parseFloat(document.getElementById('expenseAmountInput').value);
+            if (!amount || amount <= 0) return;
+            const note = document.getElementById('expenseNoteInput').value.trim();
+            state.transactions.unshift({ id: 'tx_' + Date.now(), type: 'expense', categoryId: selectedCategoryForExpense, amount: amount, note: note, date: formatNowDate() });
+            saveState();
+            renderAll();
+            closeModal('expenseModal');
+            showToast('Расход записан');
+        }
+
+        function openCustomCategoryModal() {
+            const nameInput = document.getElementById('customCatName');
+            if (nameInput) nameInput.value = '';
+            selectedCustomIcon = 'fa-plane';
+            selectedCustomColor = '#007AFF';
+
+            const iconBtns = document.querySelectorAll('#customCategoryModal .icon-opt');
+            iconBtns.forEach((b, i) => {
+                b.classList.toggle('border-[#007AFF]', i === 0);
+                b.classList.toggle('border-transparent', i !== 0);
+                b.style.color = i === 0 ? selectedCustomColor : '';
+            });
+
+            const colorBtns = document.querySelectorAll('#customCategoryModal .color-opt');
+            colorBtns.forEach((b, i) => {
+                b.classList.toggle('ring-[#007AFF]', i === 0);
+                b.classList.toggle('ring-transparent', i !== 0);
+            });
+
+            openModal('customCategoryModal');
+        }
+        function selectCatIcon(icon, btnEl) {
+            selectedCustomIcon = icon;
+            document.querySelectorAll('#customCategoryModal .icon-opt').forEach(b => {
+                b.classList.remove('border-[#007AFF]');
+                b.classList.add('border-transparent');
+                b.style.color = '';
+            });
+            if (btnEl) {
+                btnEl.classList.remove('border-transparent');
+                btnEl.classList.add('border-[#007AFF]');
+                btnEl.style.color = selectedCustomColor;
+            }
+        }
+        function selectCatColor(color, btnEl) {
+            selectedCustomColor = color;
+            document.querySelectorAll('#customCategoryModal .color-opt').forEach(b => {
+                b.classList.remove('ring-[#007AFF]');
+                b.classList.add('ring-transparent');
+            });
+            if (btnEl) {
+                btnEl.classList.remove('ring-transparent');
+                btnEl.classList.add('ring-[#007AFF]');
+            }
+            const activeIconBtn = document.querySelector('#customCategoryModal .icon-opt.border-\\[\\#007AFF\\]');
+            if (activeIconBtn) {
+                activeIconBtn.style.color = color;
+            }
+        }
+        function saveCustomCategory() {
+            const nameInput = document.getElementById('customCatName');
+            const name = nameInput ? nameInput.value.trim() : '';
+            if (!name) {
+                showToast('Введите название статьи');
+                if (nameInput) nameInput.focus();
+                return;
+            }
+            state.categories.push({
+                id: 'cat_' + Date.now(),
+                name: name,
+                icon: selectedCustomIcon,
+                color: selectedCustomColor,
+                isDefault: false
+            });
+            saveState();
+            renderAll(false);
+            closeModal('customCategoryModal');
+            showToast('Статья создана');
+        }
+
+        function exportBudgetJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+            const dl = document.createElement('a');
+            dl.setAttribute("href", dataStr);
+            dl.setAttribute("download", "budget_export.json");
+            dl.click();
+        }
+        function resetTransactionsOnly() {
+            state.transactions = [];
+            saveState();
+            renderAll();
+            closeModal('resetModal');
+            showToast('История очищена');
+        }
+        function fullResetData() {
+            localStorage.removeItem('ios27_liquid_budget_v5');
+            location.reload();
+        }
+
         function showToast(text) {
             const toast = document.getElementById('iosToast');
             document.getElementById('iosToastText').innerText = text;
             toast.classList.remove('opacity-0', '-translate-y-4');
-            setTimeout(() => {
-                toast.classList.add('opacity-0', '-translate-y-4');
-            }, 2200);
+            setTimeout(() => toast.classList.add('opacity-0', '-translate-y-4'), 2200);
         }
 
-        function formatNum(num) {
-            return new Intl.NumberFormat('ru-RU').format(Math.round(num));
-        }
-
+        function formatNum(num) { return new Intl.NumberFormat('ru-RU').format(Math.round(num)); }
+        
         function formatNowDate() {
             const now = new Date();
             const months = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
-            return `${now.getDate()} ${months[now.getMonth()]}, ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-        }
-
-        function getOperationsWord(n) {
-            const mod10 = n % 10;
-            const mod100 = n % 100;
-            if (mod10 === 1 && mod100 !== 11) return 'операция';
-            if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'операции';
-            return 'операций';
+            return `${now.getDate()} ${months[now.getMonth()]}`;
         }
     </script>
 </body>
