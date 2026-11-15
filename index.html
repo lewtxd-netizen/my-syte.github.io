@@ -379,6 +379,11 @@
         <!-- ==================== TAB 1: ГЛАВНАЯ ==================== -->
         <div id="tab-home" class="space-y-4">
             
+            <!-- Shared Budget Participant Filter (Home) -->
+            <div id="homeParticipantFilterWrap" class="hidden animate-stagger-1">
+                <div id="homeParticipantFilterPills" class="flex space-x-1.5 overflow-x-auto pb-0.5"></div>
+            </div>
+
             <section class="ios27-glass p-5 space-y-4 relative overflow-hidden animate-stagger-1">
                 <div class="flex justify-between items-center gap-2">
                     <div class="min-w-0 flex-1">
@@ -476,6 +481,11 @@
 
         <!-- ==================== TAB 2: АНАЛИТИКА ==================== -->
         <div id="tab-analytics" class="hidden space-y-4">
+            <!-- Shared Budget Participant Filter (Analytics) -->
+            <div id="analyticsParticipantFilterWrap" class="hidden animate-stagger-1">
+                <div id="analyticsParticipantFilterPills" class="flex space-x-1.5 overflow-x-auto pb-0.5"></div>
+            </div>
+
             <section class="ios27-glass p-5 space-y-4 animate-stagger-1">
                 <div class="flex justify-between items-center">
                     <div>
@@ -501,7 +511,7 @@
             <div class="ios27-glass p-3.5 space-y-3 animate-stagger-1">
                 <div class="relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-tertiary-ios text-xs"></i>
-                    <input type="text" id="historySearchInput" oninput="renderHistoryTab()" placeholder="Поиск по заметке или категории..." 
+                    <input type="text" id="historySearchInput" oninput="renderHistoryTab()" placeholder="Поиск по заметке, категории или участнику..." 
                         class="w-full pl-9 pr-4 py-2.5 rounded-2xl ios27-input text-sm placeholder-[#8E8E93]">
                 </div>
 
@@ -561,6 +571,61 @@
                     <button onclick="handleLogout()" class="w-full py-3.5 rounded-2xl bg-[#FF3B30]/12 text-[#FF3B30] font-semibold text-base shadow-sm active:scale-[0.98]">
                         Выйти из аккаунта
                     </button>
+                </div>
+            </section>
+
+            <!-- Shared Budget Card (Совместный бюджет) -->
+            <section class="ios27-glass p-5 space-y-4 animate-stagger-2">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-11 h-11 rounded-[18px] bg-gradient-to-br from-[#34C759] to-[#00C7BE] flex items-center justify-center text-white text-base shadow-sm">
+                            <i class="fa-solid fa-user-group"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-[16px] font-bold text-primary-ios leading-tight">Совместный бюджет</h3>
+                            <p class="text-[11px] text-tertiary-ios mt-0.5">Общий учёт с другом или семьёй</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Invite Code Box -->
+                <div class="p-3.5 rounded-2xl border space-y-2" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-semibold text-secondary-ios">Ваш код приглашения</span>
+                        <span class="text-[10px] font-medium text-tertiary-ios">Отправьте другу</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-2">
+                        <div id="myInviteCodeDisplay" class="font-mono text-base font-bold tracking-wider text-primary-ios px-3 py-1.5 rounded-xl select-all" style="background: var(--surface-pill);">
+                            BUD-000
+                        </div>
+                        <button type="button" onclick="copyInviteCode()" class="px-3.5 py-2 rounded-xl bg-[#007AFF] active:bg-[#0062CC] text-white text-xs font-semibold flex items-center space-x-1.5 active:scale-95 transition-transform">
+                            <i class="fa-solid fa-copy text-[11px]"></i>
+                            <span>Копировать</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Join by Code Input -->
+                <div class="space-y-1.5">
+                    <label class="text-[11px] font-semibold text-secondary-ios ml-1 block">Присоединиться по коду друга</label>
+                    <div class="flex space-x-2">
+                        <input type="text" id="joinFriendCodeInput" placeholder="Например: BUD-742" maxlength="12"
+                            class="flex-1 py-2.5 px-3.5 rounded-2xl ios27-input text-sm uppercase placeholder-[#8E8E93]">
+                        <button type="button" onclick="joinFriendByCode()" class="px-4 py-2.5 rounded-2xl bg-[#34C759] active:bg-[#28A745] text-white text-xs font-bold shrink-0 active:scale-95 transition-transform">
+                            Добавить
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Participants List -->
+                <div class="space-y-2 pt-1">
+                    <div class="flex items-center justify-between px-0.5">
+                        <span class="text-xs font-semibold text-secondary-ios">Участники бюджета</span>
+                        <button type="button" onclick="addDemoFriendTransaction()" id="demoFriendTxBtn" class="hidden text-[11px] font-semibold text-[#007AFF] active:opacity-60">
+                            + Тест трата друга
+                        </button>
+                    </div>
+                    <div id="sharedParticipantsList" class="space-y-2"></div>
                 </div>
             </section>
         </div>
@@ -793,13 +858,7 @@
 
             <div class="space-y-3">
                 <p class="text-xs text-secondary-ios">Выберите день месяца, с которого начинается отсчет вашего бюджета:</p>
-                <div class="grid grid-cols-6 gap-2 max-h-48 overflow-y-auto p-2" style="background: var(--glass-tile-bg); border-radius: 20px;">
-                    <script>
-                        for(let i=1; i<=31; i++) {
-                            document.write(`<button type="button" onclick="setBudgetStartDay(${i})" class="py-2.5 rounded-xl text-xs font-bold text-primary-ios hover:bg-[#007AFF] hover:text-white transition">${i}</button>`);
-                        }
-                    </script>
-                </div>
+                <div class="grid grid-cols-6 gap-2 max-h-48 overflow-y-auto p-2" style="background: var(--glass-tile-bg); border-radius: 20px;" id="daysGridContainer"></div>
             </div>
         </div>
     </div>
@@ -1074,6 +1133,44 @@
         </div>
     </div>
 
+    <!-- Rename Friend Modal -->
+    <div id="renameFriendModal" class="fixed inset-0 bg-black/40 backdrop-blur-[4px] z-[60] flex items-end justify-center hidden opacity-0 transition-opacity duration-200" onclick="backdropClose(event, 'renameFriendModal')">
+        <div class="w-full max-w-md ios27-sheet p-5 pb-9 space-y-4 animate-sheet-up" onclick="event.stopPropagation()">
+            <div class="w-10 h-1.5 rounded-full mx-auto mb-1" style="background: var(--divider-color);"></div>
+
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold text-primary-ios">Имя и цвет участника</h3>
+                <button onclick="closeModal('renameFriendModal')" class="w-8 h-8 rounded-full flex items-center justify-center text-tertiary-ios" style="background: var(--surface-pill);">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1 block">Как отображать имя</label>
+                    <input type="text" id="renameFriendNameInput" placeholder="Например: Аня, Жена, Саша"
+                        class="w-full py-3 px-4 rounded-2xl ios27-input text-sm">
+                </div>
+
+                <div>
+                    <label class="text-[11px] font-semibold text-secondary-ios ml-1 mb-1.5 block">Цвет бейджа</label>
+                    <div id="friendColorPalette" class="flex space-x-3 p-2 justify-between" style="background: var(--glass-tile-bg); border-radius: 20px;">
+                        <button type="button" data-color="#34C759" onclick="selectFriendColor('#34C759', this)" class="friend-color-opt w-9 h-9 rounded-full bg-[#34C759] ring-2 ring-offset-2 ring-[#34C759] transition-transform active:scale-90"></button>
+                        <button type="button" data-color="#AF52DE" onclick="selectFriendColor('#AF52DE', this)" class="friend-color-opt w-9 h-9 rounded-full bg-[#AF52DE] ring-2 ring-offset-2 ring-transparent transition-transform active:scale-90"></button>
+                        <button type="button" data-color="#FF9500" onclick="selectFriendColor('#FF9500', this)" class="friend-color-opt w-9 h-9 rounded-full bg-[#FF9500] ring-2 ring-offset-2 ring-transparent transition-transform active:scale-90"></button>
+                        <button type="button" data-color="#FF2D55" onclick="selectFriendColor('#FF2D55', this)" class="friend-color-opt w-9 h-9 rounded-full bg-[#FF2D55] ring-2 ring-offset-2 ring-transparent transition-transform active:scale-90"></button>
+                        <button type="button" data-color="#00C7BE" onclick="selectFriendColor('#00C7BE', this)" class="friend-color-opt w-9 h-9 rounded-full bg-[#00C7BE] ring-2 ring-offset-2 ring-transparent transition-transform active:scale-90"></button>
+                        <button type="button" data-color="#5856D6" onclick="selectFriendColor('#5856D6', this)" class="friend-color-opt w-9 h-9 rounded-full bg-[#5856D6] ring-2 ring-offset-2 ring-transparent transition-transform active:scale-90"></button>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" onclick="saveFriendRename()" class="w-full py-3.5 rounded-2xl bg-[#007AFF] active:bg-[#0062CC] text-white font-semibold text-base shadow-sm transition-transform active:scale-[0.98]">
+                Сохранить
+            </button>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div id="iosToast" class="fixed top-12 left-1/2 -translate-x-1/2 z-50 ios27-glass px-4 py-2.5 rounded-full flex items-center space-x-2 opacity-0 pointer-events-none transition-all duration-300 -translate-y-4">
         <i class="fa-solid fa-circle-check text-[#34C759] text-sm"></i>
@@ -1107,6 +1204,7 @@
                     currentUser = session.user;
                     updateProfileUI(true);
                     loadCloudData();
+                    subscribeSharedRealtime();
                 } else {
                     currentUser = null;
                     updateProfileUI(false);
@@ -1166,16 +1264,20 @@
             if (authMode === 'register') {
                 const { data, error } = await supabaseClient.auth.signUp({ email, password });
                 if (error) showToast('Ошибка: ' + error.message);
-                else { currentUser = data.user; updateProfileUI(true); showToast('Регистрация успешна!'); saveCloudData(); }
+                else { currentUser = data.user; updateProfileUI(true); showToast('Регистрация успешна!'); saveCloudData(); subscribeSharedRealtime(); }
             } else {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) showToast('Ошибка входа: неверные данные');
-                else { currentUser = data.user; updateProfileUI(true); showToast('Вход выполнен!'); loadCloudData(); }
+                else { currentUser = data.user; updateProfileUI(true); showToast('Вход выполнен!'); loadCloudData(); subscribeSharedRealtime(); }
             }
         }
 
         async function handleLogout() {
             if (!supabaseClient) return;
+            if (sharedRealtimeChannel) {
+                supabaseClient.removeChannel(sharedRealtimeChannel);
+                sharedRealtimeChannel = null;
+            }
             await supabaseClient.auth.signOut();
             currentUser = null;
             updateProfileUI(false);
@@ -1187,6 +1289,7 @@
             try {
                 await supabaseClient.from('user_budgets').upsert({
                     user_id: currentUser.id,
+                    family_id: state.familyId || state.inviteCode,
                     state_data: state,
                     updated_at: new Date()
                 }, { onConflict: 'user_id' });
@@ -1199,6 +1302,7 @@
                 const { data } = await supabaseClient.from('user_budgets').select('state_data').eq('user_id', currentUser.id).single();
                 if (data && data.state_data) {
                     state = { ...state, ...data.state_data };
+                    ensureSharedBudgetDefaults();
                     renderAll();
                     showToast('Данные загружены из облака');
                 }
@@ -1221,6 +1325,9 @@
             theme: 'dark',
             wallpaper: 1,
             budgetStartDay: 1,
+            inviteCode: '',
+            familyId: '',
+            friends: [],
             categories: [...DEFAULT_CATEGORIES],
             transactions: [],
             credits: []
@@ -1231,15 +1338,51 @@
         let selectedCustomIcon = 'fa-plane';
         let selectedCustomColor = '#007AFF';
         let historyFilterCat = 'all';
+        let selectedParticipantFilter = 'all';
+        let editingFriendId = null;
+        let selectedFriendBadgeColor = '#34C759';
+        let sharedRealtimeChannel = null;
         let categoryEditMode = false;
         let analyticsChartObj = null;
         let modalTimers = {};
 
+        function generateInviteCode() {
+            const num = Math.floor(100 + Math.random() * 900);
+            return `BUD-${num}`;
+        }
+
+        function ensureSharedBudgetDefaults() {
+            if (!state.inviteCode) {
+                state.inviteCode = generateInviteCode();
+            }
+            if (!state.familyId) {
+                state.familyId = state.inviteCode;
+            }
+            if (!Array.isArray(state.friends)) {
+                state.friends = [];
+            }
+            if (selectedParticipantFilter !== 'all' && selectedParticipantFilter !== 'me') {
+                const exists = state.friends.some(f => f.id === selectedParticipantFilter);
+                if (!exists) selectedParticipantFilter = 'all';
+            }
+        }
+
         window.onload = function() {
             loadState();
+            ensureSharedBudgetDefaults();
             applyTheme(state.theme);
             applyWallpaper(state.wallpaper);
             initSupabase();
+
+            // Populate budget start days
+            const daysGrid = document.getElementById('daysGridContainer');
+            if (daysGrid) {
+                let daysHtml = '';
+                for(let i=1; i<=31; i++) {
+                    daysHtml += `<button type="button" onclick="setBudgetStartDay(${i})" class="py-2.5 rounded-xl text-xs font-bold text-primary-ios hover:bg-[#007AFF] hover:text-white transition">${i}</button>`;
+                }
+                daysGrid.innerHTML = daysHtml;
+            }
 
             window.addEventListener('resize', () => {
                 updateDockIndicator();
@@ -1390,6 +1533,9 @@
         }
 
         function renderAll(animateCats = false) {
+            ensureSharedBudgetDefaults();
+            renderParticipantFilters();
+            renderSharedBudgetSection();
             renderBalanceCard();
             renderCategoriesGrid(animateCats);
             renderCreditsWidget();
@@ -1398,11 +1544,356 @@
             if (activeTab === 'history') renderHistoryTab();
         }
 
+        function getFilteredTransactionsByParticipant() {
+            if (selectedParticipantFilter === 'all') {
+                return state.transactions;
+            }
+            if (selectedParticipantFilter === 'me') {
+                return state.transactions.filter(t => !t.authorId || t.authorId === 'me');
+            }
+            return state.transactions.filter(t => t.authorId === selectedParticipantFilter);
+        }
+
+        function setParticipantFilter(filterId) {
+            selectedParticipantFilter = filterId;
+            renderAll(false);
+        }
+
+        function renderParticipantFilters() {
+            const hasFriends = state.friends && state.friends.length > 0;
+            const homeWrap = document.getElementById('homeParticipantFilterWrap');
+            const analyticsWrap = document.getElementById('analyticsParticipantFilterWrap');
+            const homePills = document.getElementById('homeParticipantFilterPills');
+            const analyticsPills = document.getElementById('analyticsParticipantFilterPills');
+
+            if (!homeWrap || !analyticsWrap || !homePills || !analyticsPills) return;
+
+            if (!hasFriends) {
+                homeWrap.classList.add('hidden');
+                analyticsWrap.classList.add('hidden');
+                return;
+            }
+
+            homeWrap.classList.remove('hidden');
+            analyticsWrap.classList.remove('hidden');
+
+            const buildPillsHtml = () => {
+                let html = `
+                    <button type="button" onclick="setParticipantFilter('all')" class="px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all ${selectedParticipantFilter === 'all' ? 'bg-[#007AFF] text-white shadow-xs' : 'ios27-glass text-primary-ios'}">
+                        Все
+                    </button>
+                    <button type="button" onclick="setParticipantFilter('me')" class="px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 flex items-center space-x-1.5 transition-all ${selectedParticipantFilter === 'me' ? 'bg-[#007AFF] text-white shadow-xs' : 'ios27-glass text-primary-ios'}">
+                        <span class="w-2 h-2 rounded-full bg-[#0A84FF]"></span>
+                        <span>Мои</span>
+                    </button>
+                `;
+                state.friends.forEach(friend => {
+                    const active = selectedParticipantFilter === friend.id;
+                    html += `
+                        <button type="button" onclick="setParticipantFilter('${friend.id}')" class="px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 flex items-center space-x-1.5 transition-all ${active ? 'bg-[#007AFF] text-white shadow-xs' : 'ios27-glass text-primary-ios'}">
+                            <span class="w-2 h-2 rounded-full" style="background: ${friend.color || '#34C759'};"></span>
+                            <span>${escapeHtml(friend.name)}</span>
+                        </button>
+                    `;
+                });
+                return html;
+            };
+
+            const html = buildPillsHtml();
+            homePills.innerHTML = html;
+            analyticsPills.innerHTML = html;
+        }
+
+        function renderSharedBudgetSection() {
+            const codeDisplay = document.getElementById('myInviteCodeDisplay');
+            if (codeDisplay) codeDisplay.innerText = state.inviteCode;
+
+            const demoBtn = document.getElementById('demoFriendTxBtn');
+            if (demoBtn) {
+                demoBtn.classList.toggle('hidden', state.friends.length === 0);
+            }
+
+            const listEl = document.getElementById('sharedParticipantsList');
+            if (!listEl) return;
+
+            const myName = currentUser && currentUser.email ? `@${currentUser.email.split('@')[0]}` : 'Вы (Владелец)';
+            let html = `
+                <div class="p-3 rounded-2xl border flex items-center justify-between" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
+                    <div class="flex items-center space-x-2.5 min-w-0">
+                        <div class="w-9 h-9 rounded-full bg-[#0A84FF] text-white font-bold text-xs flex items-center justify-center shrink-0">
+                            Вы
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-xs font-bold text-primary-ios truncate">${escapeHtml(myName)}</p>
+                            <p class="text-[10px] text-tertiary-ios">Создатель бюджета</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-semibold px-2.5 py-1 rounded-full text-[#0A84FF]" style="background: rgba(10, 132, 255, 0.14);">Активен</span>
+                </div>
+            `;
+
+            state.friends.forEach(friend => {
+                const initial = (friend.name || 'Д').trim().charAt(0).toUpperCase();
+                html += `
+                    <div class="p-3 rounded-2xl border flex items-center justify-between gap-2" style="background: var(--glass-tile-bg); border-color: var(--glass-border);">
+                        <div class="flex items-center space-x-2.5 min-w-0">
+                            <div class="w-9 h-9 rounded-full text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs" style="background: ${friend.color || '#34C759'};">
+                                ${escapeHtml(initial)}
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-bold text-primary-ios truncate">${escapeHtml(friend.name)}</p>
+                                <p class="text-[10px] text-tertiary-ios truncate">Код: ${escapeHtml(friend.code || 'BUD-FRIEND')}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-1.5 shrink-0">
+                            <button type="button" onclick="openRenameFriendModal('${friend.id}')" class="w-8 h-8 rounded-full flex items-center justify-center text-secondary-ios hover:text-[#007AFF] active:scale-90 transition-transform" style="background: var(--surface-pill);" title="Переименовать">
+                                <i class="fa-solid fa-pen text-[11px]"></i>
+                            </button>
+                            <button type="button" onclick="removeFriend('${friend.id}')" class="w-8 h-8 rounded-full flex items-center justify-center text-secondary-ios hover:text-[#FF3B30] active:scale-90 transition-transform" style="background: var(--surface-pill);" title="Отключить">
+                                <i class="fa-solid fa-user-minus text-[11px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            listEl.innerHTML = html;
+        }
+
+        function copyInviteCode() {
+            const code = state.inviteCode || 'BUD-000';
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code).catch(() => fallbackCopyText(code));
+            } else {
+                fallbackCopyText(code);
+            }
+            showToast(`Код ${code} скопирован`);
+        }
+
+        function fallbackCopyText(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); } catch (e) {}
+            document.body.removeChild(ta);
+        }
+
+        async function joinFriendByCode() {
+            const input = document.getElementById('joinFriendCodeInput');
+            if (!input) return;
+            const rawCode = input.value.trim().toUpperCase();
+            if (!rawCode || rawCode.length < 4) {
+                showToast('Введите корректный код друга');
+                input.focus();
+                return;
+            }
+            if (rawCode === state.inviteCode) {
+                showToast('Нельзя добавить свой собственный код');
+                return;
+            }
+            if (state.friends.some(f => f.code === rawCode)) {
+                showToast('Этот участник уже добавлен');
+                return;
+            }
+
+            const palette = ['#34C759', '#AF52DE', '#FF9500', '#FF2D55', '#00C7BE', '#5856D6'];
+            const color = palette[state.friends.length % palette.length];
+            const defaultNames = ['Аня', 'Саша', 'Друг', 'Партнёр'];
+            const defaultName = defaultNames[state.friends.length % defaultNames.length];
+
+            const newFriend = {
+                id: 'fr_' + Date.now(),
+                code: rawCode,
+                name: defaultName,
+                color: color
+            };
+
+            state.friends.push(newFriend);
+            state.familyId = rawCode;
+            input.value = '';
+
+            if (supabaseClient && currentUser) {
+                try {
+                    const { data } = await supabaseClient
+                        .from('user_budgets')
+                        .select('state_data')
+                        .eq('family_id', rawCode)
+                        .limit(1);
+                    if (data && data.length > 0 && data[0].state_data && Array.isArray(data[0].state_data.transactions)) {
+                        const existingIds = new Set(state.transactions.map(t => t.id));
+                        data[0].state_data.transactions.forEach(tx => {
+                            if (!existingIds.has(tx.id)) {
+                                state.transactions.push({
+                                    ...tx,
+                                    authorId: newFriend.id,
+                                    authorName: newFriend.name,
+                                    authorColor: newFriend.color
+                                });
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.error('Supabase family sync error:', e);
+                }
+                subscribeSharedRealtime();
+            }
+
+            saveState();
+            renderAll(false);
+            showToast(`Участник «${defaultName}» подключён`);
+        }
+
+        function openRenameFriendModal(friendId) {
+            const friend = state.friends.find(f => f.id === friendId);
+            if (!friend) return;
+            editingFriendId = friendId;
+            selectedFriendBadgeColor = friend.color || '#34C759';
+
+            const nameInput = document.getElementById('renameFriendNameInput');
+            if (nameInput) nameInput.value = friend.name || '';
+
+            document.querySelectorAll('#friendColorPalette .friend-color-opt').forEach(btn => {
+                const isMatch = btn.dataset.color === selectedFriendBadgeColor;
+                btn.style.outline = isMatch ? `2px solid ${selectedFriendBadgeColor}` : 'none';
+                btn.style.outlineOffset = '2px';
+            });
+
+            openModal('renameFriendModal');
+        }
+
+        function selectFriendColor(color, btnEl) {
+            selectedFriendBadgeColor = color;
+            document.querySelectorAll('#friendColorPalette .friend-color-opt').forEach(btn => {
+                btn.style.outline = 'none';
+            });
+            if (btnEl) {
+                btnEl.style.outline = `2px solid ${color}`;
+                btnEl.style.outlineOffset = '2px';
+            }
+        }
+
+        function saveFriendRename() {
+            if (!editingFriendId) return;
+            const friend = state.friends.find(f => f.id === editingFriendId);
+            if (!friend) return;
+
+            const nameInput = document.getElementById('renameFriendNameInput');
+            const newName = nameInput ? nameInput.value.trim() : '';
+            if (!newName) {
+                showToast('Введите имя участника');
+                if (nameInput) nameInput.focus();
+                return;
+            }
+
+            friend.name = newName;
+            friend.color = selectedFriendBadgeColor;
+
+            state.transactions.forEach(tx => {
+                if (tx.authorId === friend.id) {
+                    tx.authorName = newName;
+                    tx.authorColor = selectedFriendBadgeColor;
+                }
+            });
+
+            saveState();
+            renderAll(false);
+            closeModal('renameFriendModal');
+            showToast(`Переименован в «${newName}»`);
+        }
+
+        function removeFriend(friendId) {
+            state.friends = state.friends.filter(f => f.id !== friendId);
+            if (selectedParticipantFilter === friendId) {
+                selectedParticipantFilter = 'all';
+            }
+            if (state.friends.length === 0) {
+                state.familyId = state.inviteCode;
+            }
+            saveState();
+            renderAll(false);
+            showToast('Участник отключён');
+        }
+
+        function addDemoFriendTransaction() {
+            if (state.friends.length === 0) return;
+            const friend = state.friends[0];
+            const samples = [
+                { cat: 'groceries', amount: 1450, note: 'Продукты на ужин' },
+                { cat: 'cafes', amount: 680, note: 'Кофе и десерт' },
+                { cat: 'transport', amount: 420, note: 'Такси домой' }
+            ];
+            const pick = samples[Math.floor(Math.random() * samples.length)];
+            state.transactions.unshift({
+                id: 'tx_' + Date.now(),
+                type: 'expense',
+                categoryId: pick.cat,
+                amount: pick.amount,
+                note: pick.note,
+                date: formatNowDate(),
+                authorId: friend.id,
+                authorName: friend.name,
+                authorColor: friend.color
+            });
+            saveState();
+            renderAll(false);
+            showToast(`Добавила ${friend.name}: -${formatNum(pick.amount)} ₽`);
+        }
+
+        function subscribeSharedRealtime() {
+            if (!supabaseClient || !currentUser || !state.familyId) return;
+            if (sharedRealtimeChannel) {
+                supabaseClient.removeChannel(sharedRealtimeChannel);
+            }
+            sharedRealtimeChannel = supabaseClient
+                .channel('shared-budget-' + state.familyId)
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'user_budgets',
+                    filter: `family_id=eq.${state.familyId}`
+                }, (payload) => {
+                    if (payload.new && payload.new.user_id !== currentUser.id && payload.new.state_data) {
+                        const remoteTxs = payload.new.state_data.transactions || [];
+                        const localIds = new Set(state.transactions.map(t => t.id));
+                        let added = false;
+                        remoteTxs.forEach(tx => {
+                            if (!localIds.has(tx.id)) {
+                                const friend = state.friends[0];
+                                state.transactions.unshift({
+                                    ...tx,
+                                    authorId: friend ? friend.id : 'friend',
+                                    authorName: friend ? friend.name : 'Друг',
+                                    authorColor: friend ? friend.color : '#34C759'
+                                });
+                                added = true;
+                            }
+                        });
+                        if (added) {
+                            renderAll(false);
+                            showToast('Новая операция от участника');
+                        }
+                    }
+                })
+                .subscribe();
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
         function renderBalanceCard() {
             document.getElementById('budgetPeriodLabel').innerText = `С ${state.budgetStartDay}-го числа`;
             
-            const totalIncome = state.transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-            const totalExpense = state.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+            const scopedTxs = getFilteredTransactionsByParticipant();
+            const totalIncome = scopedTxs.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+            const totalExpense = scopedTxs.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
             const balance = totalIncome - totalExpense;
 
             const balanceEl = document.getElementById('balanceAmount');
@@ -1437,7 +1928,7 @@
             document.getElementById('spentRatioLabel').innerText = `Израсходовано ${ratio}%`;
 
             const catSums = {};
-            state.transactions.filter(t => t.type === 'expense').forEach(t => {
+            scopedTxs.filter(t => t.type === 'expense').forEach(t => {
                 catSums[t.categoryId] = (catSums[t.categoryId] || 0) + t.amount;
             });
 
@@ -1471,8 +1962,9 @@
             const grid = document.getElementById('categoriesGrid');
             grid.innerHTML = '';
 
+            const scopedTxs = getFilteredTransactionsByParticipant();
             const catSpent = {};
-            state.transactions.filter(t => t.type === 'expense').forEach(t => {
+            scopedTxs.filter(t => t.type === 'expense').forEach(t => {
                 catSpent[t.categoryId] = (catSpent[t.categoryId] || 0) + t.amount;
             });
 
@@ -1603,7 +2095,7 @@
         function renderRecentTransactions() {
             const list = document.getElementById('recentTransactionsList');
             list.innerHTML = '';
-            const recent = state.transactions.slice(0, 5);
+            const recent = getFilteredTransactionsByParticipant().slice(0, 5);
             if (recent.length === 0) {
                 list.innerHTML = `<p class="text-xs text-tertiary-ios text-center py-4">Нет операций.</p>`;
                 return;
@@ -1617,6 +2109,22 @@
                 ? { name: 'Доход', icon: 'fa-money-bill-wave', color: '#34C759' }
                 : (state.categories.find(c => c.id === tx.categoryId) || { name: 'Расход', icon: 'fa-receipt', color: '#8E8E93' });
 
+            let authorName = 'Вы';
+            let authorColor = '#0A84FF';
+            if (tx.authorId && tx.authorId !== 'me') {
+                const friend = state.friends.find(f => f.id === tx.authorId);
+                authorName = friend ? friend.name : (tx.authorName || 'Друг');
+                authorColor = friend ? friend.color : (tx.authorColor || '#34C759');
+            }
+
+            const showAuthorBadge = state.friends.length > 0 || (tx.authorId && tx.authorId !== 'me');
+            const authorBadgeHtml = showAuthorBadge
+                ? `<span class="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold ml-1.5" style="background: ${authorColor}22; color: ${authorColor};">
+                        <span class="w-1.5 h-1.5 rounded-full" style="background: ${authorColor};"></span>
+                        <span>${escapeHtml(authorName)}</span>
+                   </span>`
+                : '';
+
             const row = document.createElement('div');
             row.className = 'py-2.5 flex items-center justify-between';
             row.innerHTML = `
@@ -1625,8 +2133,11 @@
                         <i class="fa-solid ${cat.icon}"></i>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-[14px] font-bold text-primary-ios truncate leading-tight">${tx.note || cat.name}</p>
-                        <p class="text-[11px] text-tertiary-ios mt-0.5">${tx.date}</p>
+                        <p class="text-[14px] font-bold text-primary-ios truncate leading-tight">${escapeHtml(tx.note || cat.name)}</p>
+                        <div class="flex items-center text-[11px] text-tertiary-ios mt-0.5">
+                            <span>${tx.date}</span>
+                            ${authorBadgeHtml}
+                        </div>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 shrink-0">
@@ -1660,14 +2171,16 @@
         }
 
         function renderAnalyticsTab() {
-            const totalExpense = state.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+            const scopedTxs = getFilteredTransactionsByParticipant();
+            const totalExpense = scopedTxs.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
             document.getElementById('analyticsTotalBadge').innerText = `${formatNum(totalExpense)} ₽`;
 
             const catSums = {};
-            state.transactions.filter(t => t.type === 'expense').forEach(t => {
+            scopedTxs.filter(t => t.type === 'expense').forEach(t => {
                 catSums[t.categoryId] = (catSums[t.categoryId] || 0) + t.amount;
             });
 
+            // Ascending sort by amount (smallest to largest)
             const sortedCatEntries = Object.entries(catSums).sort((a, b) => a[1] - b[1]);
 
             const canvas = document.getElementById('analyticsDonutCanvas');
@@ -1796,12 +2309,13 @@
                 `;
             });
 
-            const filtered = state.transactions.filter(tx => {
+            const filtered = getFilteredTransactionsByParticipant().filter(tx => {
                 const matchesCat = historyFilterCat === 'all' || tx.categoryId === historyFilterCat;
                 const cat = state.categories.find(c => c.id === tx.categoryId) || {};
                 const noteMatch = (tx.note || '').toLowerCase().includes(query);
                 const catMatch = (cat.name || '').toLowerCase().includes(query);
-                return matchesCat && (query === '' || noteMatch || catMatch);
+                const authorMatch = (tx.authorName || 'Вы').toLowerCase().includes(query);
+                return matchesCat && (query === '' || noteMatch || catMatch || authorMatch);
             });
 
             document.getElementById('historyCountLabel').innerText = `${filtered.length} операций`;
@@ -1989,7 +2503,7 @@
                                 </div>
                                 <div class="min-w-0">
                                     <div class="flex items-center space-x-1.5">
-                                        <h4 class="font-bold text-sm text-primary-ios truncate">${c.name}</h4>
+                                        <h4 class="font-bold text-sm text-primary-ios truncate">${escapeHtml(c.name)}</h4>
                                         <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-[#007AFF]/15 text-[#007AFF] shrink-0">Кредитка</span>
                                     </div>
                                     <p class="text-[11px] font-semibold text-[#34C759] mt-0.5">Доступно: ${formatNum(available)} ₽</p>
@@ -2050,7 +2564,7 @@
                                 </div>
                                 <div class="min-w-0">
                                     <div class="flex items-center space-x-1.5">
-                                        <h4 class="font-bold text-sm text-primary-ios truncate">${c.name}</h4>
+                                        <h4 class="font-bold text-sm text-primary-ios truncate">${escapeHtml(c.name)}</h4>
                                         <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-[#FF9500]/15 text-[#FF9500] shrink-0">Кредит</span>
                                     </div>
                                     <p class="text-[11px] font-semibold text-[#FF3B30] mt-0.5">Остаток долга: ${formatNum(debt)} ₽</p>
@@ -2238,7 +2752,10 @@
                         categoryId: fallbackCat ? fallbackCat.id : 'transfers',
                         amount: amount,
                         note: `${item.type === 'card' ? 'Пополнение карты' : 'Платёж по кредиту'}: ${item.name}`,
-                        date: formatNowDate()
+                        date: formatNowDate(),
+                        authorId: 'me',
+                        authorName: 'Вы',
+                        authorColor: '#0A84FF'
                     });
                 }
                 showToast('Платёж внесён');
@@ -2319,7 +2836,7 @@
             const amount = parseFloat(document.getElementById('incomeAmountInput').value);
             if (!amount || amount <= 0) return;
             const note = document.getElementById('incomeNoteInput').value.trim() || 'Пополнение';
-            state.transactions.unshift({ id: 'tx_' + Date.now(), type: 'income', amount: amount, note: note, date: formatNowDate() });
+            state.transactions.unshift({ id: 'tx_' + Date.now(), type: 'income', amount: amount, note: note, date: formatNowDate(), authorId: 'me', authorName: 'Вы', authorColor: '#0A84FF' });
             saveState();
             renderAll();
             closeModal('incomeModal');
@@ -2346,7 +2863,7 @@
             const amount = parseFloat(document.getElementById('expenseAmountInput').value);
             if (!amount || amount <= 0) return;
             const note = document.getElementById('expenseNoteInput').value.trim();
-            state.transactions.unshift({ id: 'tx_' + Date.now(), type: 'expense', categoryId: selectedCategoryForExpense, amount: amount, note: note, date: formatNowDate() });
+            state.transactions.unshift({ id: 'tx_' + Date.now(), type: 'expense', categoryId: selectedCategoryForExpense, amount: amount, note: note, date: formatNowDate(), authorId: 'me', authorName: 'Вы', authorColor: '#0A84FF' });
             saveState();
             renderAll();
             closeModal('expenseModal');
